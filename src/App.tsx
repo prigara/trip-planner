@@ -9,6 +9,8 @@ type TripState = { days: Day[]; todoItems: Item[] }
 const STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
+const dayFiveItems = ['Pastries run', 'Souvenirs', 'Pack for departure']
+const daySixItems = ['Check out', 'Station transfer', 'Midday train departure']
 
 type Day = {
   label: string
@@ -55,8 +57,16 @@ const initialDays: Day[] = [
   {
     label: 'Day 5',
     date: 'May 4',
-    title: 'Wrap + Depart',
-    items: ['Pastries run', 'Souvenirs', 'Flight home'].map(mkItem),
+    title: 'Final Paris Day',
+    items: dayFiveItems.map(mkItem),
+    lunch: null,
+    dinner: null,
+  },
+  {
+    label: 'Day 6',
+    date: 'May 5',
+    title: 'Midday Train Departure',
+    items: daySixItems.map(mkItem),
     lunch: null,
     dinner: null,
   },
@@ -193,6 +203,12 @@ function App() {
     )
   }
 
+  const updateDayTitle = (dayIndex: number, title: string) => {
+    setDays(prev =>
+      prev.map((day, i) => (i === dayIndex ? { ...day, title } : day))
+    )
+  }
+
   const handleDrop = (dayIndex: number, slot: DaySlot) => {
     if (!dragRef.current) return
     const { item, source } = dragRef.current
@@ -292,7 +308,13 @@ function App() {
               <span className="day-pill">{day.label}</span>
               <span className="day-date">{day.date}</span>
             </div>
-            <h2>{day.title}</h2>
+            <input
+              className="day-title-input"
+              type="text"
+              value={day.title}
+              onChange={e => updateDayTitle(dayIndex, e.target.value)}
+              aria-label={`${day.label} title`}
+            />
             <div className="meal-section">
               {(['lunch', 'dinner'] as const).map(slot => (
                 <div
