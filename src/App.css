@@ -66,6 +66,67 @@
   margin: 0;
 }
 
+.day-title-input {
+  width: 100%;
+  padding: 6px 10px;
+  margin: -6px -10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  font: 700 20px / 1.2 var(--heading);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.day-title-input:focus {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.meal-section {
+  display: grid;
+  gap: 10px;
+}
+
+.meal-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px dashed rgba(146, 133, 122, 0.35);
+  background: rgba(255, 255, 255, 0.56);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+
+.meal-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.meal-empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.meal-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(146, 133, 122, 0.18);
+  cursor: grab;
+}
+
 .day-meta {
   display: flex;
   justify-content: space-between;
@@ -98,6 +159,10 @@
   gap: 10px;
   color: var(--text);
   font-size: 14px;
+  min-height: 96px;
+  padding: 4px;
+  border-radius: 18px;
+  transition: box-shadow 0.15s, background 0.15s;
 }
 
 .day-list-item {
@@ -109,6 +174,7 @@
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.7);
   border: 1px dashed rgba(146, 133, 122, 0.3);
+  cursor: grab;
 }
 
 .remove-btn {
@@ -140,9 +206,18 @@
 }
 
 /* Drop target highlight */
-.day-card.drop-over {
+.drop-over {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-soft);
+}
+
+.meal-slot.drop-over,
+.day-list.drop-over {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.remove-btn.visible {
+  opacity: 1;
 }
 
 /* Todo section */

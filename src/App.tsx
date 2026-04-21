@@ -153,6 +153,7 @@ function App() {
   }
 
   const getDropId = (dayIndex: number, slot: DaySlot) => `${dayIndex}-${slot}`
+  const getItemDropId = (dayIndex: number, itemIndex: number) => `${dayIndex}-items-${itemIndex}`
 
   const handleDragStart = (item: Item, source: DragSource) => {
     dragRef.current = { item, source }
@@ -241,6 +242,97 @@ function App() {
   const removeFromDay = (item: Item, dayIndex: number, slot: DaySlot) => {
     removeItemFromSource(item, { dayIndex, slot })
     setTodoItems(prev => [...prev, item])
+  }
+
+  const moveItemIntoDayList = (dayIndex: number, targetIndex: number) => {
+    if (!dragRef.current) return
+    const { item, source } = dragRef.current
+
+    const sourceIndex =
+      source !== 'todo' && source.slot === 'items'
+        ? days[source.dayIndex].items.findIndex(currentItem => currentItem.id === item.id)
+        : -1
+
+    const adjustedTargetIndex =
+      source !== 'todo' &&
+      source.slot === 'items' &&
+      source.dayIndex === dayIndex &&
+      sourceIndex !== -1 &&
+      sourceIndex < targetIndex
+        ? targetIndex - 1
+        : targetIndex
+
+    if (
+      source !== 'todo' &&
+      source.slot === 'items' &&
+      source.dayIndex === dayIndex &&
+      sourceIndex === adjustedTargetIndex
+    ) {
+      dragRef.current = null
+      setDraggingOver(null)
+      return
+    }
+
+    let nextDays = days
+    let nextTodoItems = todoItems
+
+    if (source === 'todo') {
+      nextTodoItems = todoItems.filter(todoItem => todoItem.id !== item.id)
+    } else {
+      nextDays = days.map((day, i) => {
+        if (i !== source.dayIndex) return day
+        if (source.slot === 'items') {
+          return { ...day, items: day.items.filter(currentItem => currentItem.id !== item.id) }
+        }
+        return { ...day, [source.slot]: day[source.slot]?.id === item.id ? null : day[source.slot] }
+      })
+    }
+
+    nextDays = nextDays.map((day, i) => {
+      if (i !== dayIndex) return day
+
+      const clampedTargetIndex = Math.max(0, Math.min(adjustedTargetIndex, day.items.length))
+      return {
+        ...day,
+        items: [
+          ...day.items.slice(0, clampedTargetIndex),
+          item,
+          ...day.items.slice(clampedTargetIndex),
+        ],
+      }
+    })
+
+    setDays(nextDays)
+    setTodoItems(nextTodoItems)
+    dragRef.current = null
+    setDraggingOver(null)
+  }
+
+  const handleListDragOver = (e: React.DragEvent, dayIndex: number) => {
+    e.preventDefault()
+    setDraggingOver(getItemDropId(dayIndex, days[dayIndex].items.length))
+  }
+
+  const handleListItemDragOver = (e: React.DragEvent, dayIndex: number, itemIndex: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const bounds = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const insertAfter = e.clientY > bounds.top + bounds.height / 2
+    const targetIndex = insertAfter ? itemIndex + 1 : itemIndex
+
+    setDraggingOver(getItemDropId(dayIndex, targetIndex))
+  }
+
+  const handleListItemDrop = (e: React.DragEvent, dayIndex: number, itemIndex: number) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const bounds = (e.currentTarget as HTMLElement).getBoundingClientRect()
+    const insertAfter = e.clientY > bounds.top + bounds.height / 2
+    const targetIndex = insertAfter ? itemIndex + 1 : itemIndex
+
+    moveItemIntoDayList(dayIndex, targetIndex)
   }
 
   return (
@@ -354,19 +446,23 @@ function App() {
             </div>
             <ul
               className={`day-list${
-                draggingOver === getDropId(dayIndex, 'items') ? ' drop-over' : ''
+                draggingOver === getItemDropId(dayIndex, day.items.length) ? ' insert-end' : ''
               }`}
-              onDragOver={e => handleDragOver(e, dayIndex, 'items')}
+              onDragOver={e => handleListDragOver(e, dayIndex)}
               onDragLeave={handleDragLeave}
-              onDrop={() => handleDrop(dayIndex, 'items')}
+              onDrop={() => moveItemIntoDayList(dayIndex, day.items.length)}
             >
-              {day.items.map(item => (
+              {day.items.map((item, itemIndex) => (
                 <li
                   key={item.id}
-                  className="day-list-item"
+                  className={`day-list-item${
+                    draggingOver === getItemDropId(dayIndex, itemIndex) ? ' insert-before' : ''
+                  }`}
                   draggable
                   onDragStart={() => handleDragStart(item, { dayIndex, slot: 'items' })}
                   onDragEnd={handleDragEnd}
+                  onDragOver={e => handleListItemDragOver(e, dayIndex, itemIndex)}
+                  onDrop={e => handleListItemDrop(e, dayIndex, itemIndex)}
                 >
                   <span>{item.text}</span>
                   <button
