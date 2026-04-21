@@ -68,11 +68,16 @@
 
 .day-title-input {
   width: 100%;
+  min-height: calc(1.2em + 12px);
   padding: 6px 10px;
   margin: -6px -10px;
   border: 1px solid transparent;
   border-radius: 12px;
   background: transparent;
+  resize: none;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
   font: 700 20px / 1.2 var(--heading);
   color: var(--text);
   outline: none;
@@ -162,6 +167,7 @@
   min-height: 96px;
   padding: 4px;
   border-radius: 18px;
+  position: relative;
   transition: box-shadow 0.15s, background 0.15s;
 }
 
@@ -175,6 +181,27 @@
   background: rgba(255, 255, 255, 0.7);
   border: 1px dashed rgba(146, 133, 122, 0.3);
   cursor: grab;
+  position: relative;
+}
+
+.day-list-item.insert-before::before,
+.day-list.insert-end::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.day-list-item.insert-before::before {
+  top: -8px;
+}
+
+.day-list.insert-end::after {
+  bottom: 0;
 }
 
 .remove-btn {

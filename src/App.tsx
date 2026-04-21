@@ -134,6 +134,13 @@ function App() {
   const [newItemText, setNewItemText] = useState('')
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
   const dragRef = useRef<{ item: Item; source: DragSource } | null>(null)
+  const dayTitleRefs = useRef<Array<HTMLTextAreaElement | null>>([])
+
+  const autoSizeDayTitle = (element: HTMLTextAreaElement | null) => {
+    if (!element) return
+    element.style.height = '0px'
+    element.style.height = `${element.scrollHeight}px`
+  }
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -144,6 +151,10 @@ function App() {
       } satisfies TripState),
     )
   }, [days, todoItems])
+
+  useEffect(() => {
+    dayTitleRefs.current.forEach(autoSizeDayTitle)
+  }, [days])
 
   const addItem = () => {
     const text = newItemText.trim()
@@ -400,12 +411,19 @@ function App() {
               <span className="day-pill">{day.label}</span>
               <span className="day-date">{day.date}</span>
             </div>
-            <input
+            <textarea
               className="day-title-input"
-              type="text"
+              ref={element => {
+                dayTitleRefs.current[dayIndex] = element
+                autoSizeDayTitle(element)
+              }}
               value={day.title}
-              onChange={e => updateDayTitle(dayIndex, e.target.value)}
+              onChange={e => {
+                autoSizeDayTitle(e.currentTarget)
+                updateDayTitle(dayIndex, e.target.value)
+              }}
               aria-label={`${day.label} title`}
+              rows={1}
             />
             <div className="meal-section">
               {(['lunch', 'dinner'] as const).map(slot => (
