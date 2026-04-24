@@ -12,6 +12,14 @@
   gap: 24px;
 }
 
+.trip-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .eyebrow {
   font-size: 13px;
   letter-spacing: 0.36em;
@@ -27,7 +35,6 @@
 .trip-dates {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   padding: 10px 18px;
   border-radius: 999px;
   background: var(--surface);
@@ -37,8 +44,24 @@
   font-weight: 600;
 }
 
-.dot {
-  color: var(--accent);
+.trip-action-btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  font: 600 14px / 1 var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+.trip-action-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.trip-action-btn:active {
+  transform: translateY(1px);
 }
 
 .days {
@@ -400,6 +423,10 @@
   .trip-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .trip-actions {
+    justify-content: flex-start;
   }
 }
 

@@ -9,6 +9,16 @@ type TripState = { days: Day[]; todoItems: Item[] }
 const STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
+const DATE_DISPLAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+})
+const HEADER_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+})
 const dayFiveItems = ['Pastries run', 'Souvenirs', 'Pack for departure']
 const daySixItems = ['Check out', 'Station transfer', 'Midday train departure']
 
@@ -127,6 +137,30 @@ const loadTripState = (): TripState => {
   return { days: initialDays, todoItems: [] }
 }
 
+const parseDayDate = (dateLabel: string) => {
+  const parsedDate = new Date(`${dateLabel}, 2026 00:00:00 UTC`)
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+}
+
+const formatDayDate = (date: Date) => DATE_DISPLAY_FORMATTER.format(date)
+const formatHeaderDate = (date: Date) => HEADER_DATE_FORMATTER.format(date)
+
+const getTripRangeLabel = (days: Day[]) => {
+  const firstDay = days[0]
+  const lastDay = days[days.length - 1]
+
+  if (!firstDay || !lastDay) return ''
+
+  const firstDate = parseDayDate(firstDay.date)
+  const lastDate = parseDayDate(lastDay.date)
+
+  if (!firstDate || !lastDate) {
+    return `${firstDay.date} • ${lastDay.date}`
+  }
+
+  return `${formatHeaderDate(firstDate)} • ${formatHeaderDate(lastDate)}`
+}
+
 function App() {
   const [{ days: initialStoredDays, todoItems: initialStoredTodoItems }] = useState(loadTripState)
   const [days, setDays] = useState<Day[]>(initialStoredDays)
@@ -219,6 +253,29 @@ function App() {
     setDays(prev =>
       prev.map((day, i) => (i === dayIndex ? { ...day, title } : day))
     )
+  }
+
+  const addExtraDay = () => {
+    setDays(prev => {
+      const lastDay = prev[prev.length - 1]
+      const nextDayNumber = prev.length + 1
+      const lastDayDate = lastDay ? parseDayDate(lastDay.date) : null
+      const nextDate = lastDayDate
+        ? new Date(lastDayDate.getTime() + 24 * 60 * 60 * 1000)
+        : null
+
+      return [
+        ...prev,
+        {
+          label: `Day ${nextDayNumber}`,
+          date: nextDate ? formatDayDate(nextDate) : `Day ${nextDayNumber}`,
+          title: 'Extra day',
+          items: [],
+          lunch: null,
+          dinner: null,
+        },
+      ]
+    })
   }
 
   const handleDrop = (dayIndex: number, slot: DaySlot) => {
@@ -353,10 +410,13 @@ function App() {
           <p className="eyebrow">Trip</p>
           <h1>Paris</h1>
         </div>
-        <div className="trip-dates">
-          <span>April 30</span>
-          <span className="dot">•</span>
-          <span>May 5</span>
+        <div className="trip-actions">
+          <div className="trip-dates">
+            {getTripRangeLabel(days)}
+          </div>
+          <button className="trip-action-btn" onClick={addExtraDay}>
+            Add day
+          </button>
         </div>
       </header>
 
@@ -406,7 +466,7 @@ function App() {
 
       <section className="days" aria-label="Trip days">
         {days.map((day, dayIndex) => (
-          <article key={day.label} className="day-card">
+          <article key={`${day.label}-${day.date}`} className="day-card">
             <div className="day-meta">
               <span className="day-pill">{day.label}</span>
               <span className="day-date">{day.date}</span>
