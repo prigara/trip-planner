@@ -278,6 +278,39 @@ function App() {
     })
   }
 
+  const removeDay = (dayIndex: number) => {
+    const dayToRemove = days[dayIndex]
+    const itemsToReturn = [
+      ...dayToRemove.items,
+      ...(dayToRemove.lunch ? [dayToRemove.lunch] : []),
+      ...(dayToRemove.dinner ? [dayToRemove.dinner] : []),
+    ]
+
+    if (itemsToReturn.length > 0) {
+      setTodoItems(todo => [...todo, ...itemsToReturn])
+    }
+
+    setDays(prev => {
+      const remainingDays = prev.filter((_, i) => i !== dayIndex)
+      if (remainingDays.length === 0) return []
+
+      const firstDay = prev[0]
+      const firstDate = parseDayDate(firstDay.date)
+
+      return remainingDays.map((day, i) => {
+        const nextDate = firstDate
+          ? new Date(firstDate.getTime() + i * 24 * 60 * 60 * 1000)
+          : null
+
+        return {
+          ...day,
+          label: `Day ${i + 1}`,
+          date: nextDate ? formatDayDate(nextDate) : day.date,
+        }
+      })
+    })
+  }
+
   const handleDrop = (dayIndex: number, slot: DaySlot) => {
     if (!dragRef.current) return
     const { item, source } = dragRef.current
@@ -469,7 +502,19 @@ function App() {
           <article key={`${day.label}-${day.date}`} className="day-card">
             <div className="day-meta">
               <span className="day-pill">{day.label}</span>
-              <span className="day-date">{day.date}</span>
+              <div className="day-meta-actions">
+                <span className="day-date">{day.date}</span>
+                <button
+                  className="remove-day-btn"
+                  onClick={() => removeDay(dayIndex)}
+                  aria-label={`Remove ${day.label}`}
+                  title="Remove day"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  </svg>
+                </button>
+              </div>
             </div>
             <textarea
               className="day-title-input"

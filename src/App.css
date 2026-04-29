@@ -185,6 +185,30 @@
   font-weight: 600;
 }
 
+.day-meta-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.remove-day-btn {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.remove-day-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
 .day-list {
   list-style: none;
   padding: 0;
