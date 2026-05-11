@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import './App.css'
 
 type Item = { id: string; text: string }
@@ -7,6 +7,24 @@ type DragSource = 'todo' | { dayIndex: number; slot: DaySlot }
 type TripState = { days: Day[]; todoItems: Item[] }
 
 const STORAGE_KEY = 'trip-planner-state-v1'
+const THEME_STORAGE_KEY = 'trip-planner-theme-v1'
+
+type ThemeChoice = 'light' | 'dark' | 'system'
+
+const isThemeChoice = (value: unknown): value is ThemeChoice =>
+  value === 'light' || value === 'dark' || value === 'system'
+
+const loadThemeChoice = (): ThemeChoice => {
+  if (typeof window === 'undefined') return 'system'
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+  return isThemeChoice(stored) ? stored : 'system'
+}
+
+const resolveTheme = (choice: ThemeChoice): 'light' | 'dark' => {
+  if (choice !== 'system') return choice
+  if (typeof window === 'undefined' || !window.matchMedia) return 'light'
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
 const DATE_DISPLAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
@@ -161,11 +179,70 @@ const getTripRangeLabel = (days: Day[]) => {
   return `${formatHeaderDate(firstDate)} • ${formatHeaderDate(lastDate)}`
 }
 
+const THEME_OPTIONS: { value: ThemeChoice; label: string; icon: ReactNode }[] = [
+  {
+    value: 'light',
+    label: 'Light theme',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+      </svg>
+    ),
+  },
+  {
+    value: 'dark',
+    label: 'Dark theme',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+    ),
+  },
+  {
+    value: 'system',
+    label: 'System theme',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="13" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </svg>
+    ),
+  },
+]
+
+function ThemeChooser({
+  value,
+  onChange,
+}: {
+  value: ThemeChoice
+  onChange: (next: ThemeChoice) => void
+}) {
+  return (
+    <div className="theme-chooser" role="group" aria-label="Theme">
+      {THEME_OPTIONS.map(option => (
+        <button
+          key={option.value}
+          type="button"
+          className="theme-chooser-btn"
+          aria-label={option.label}
+          aria-pressed={value === option.value}
+          title={option.label}
+          onClick={() => onChange(option.value)}
+        >
+          {option.icon}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function App() {
   const [{ days: initialStoredDays, todoItems: initialStoredTodoItems }] = useState(loadTripState)
   const [days, setDays] = useState<Day[]>(initialStoredDays)
   const [todoItems, setTodoItems] = useState<Item[]>(initialStoredTodoItems)
   const [newItemText, setNewItemText] = useState('')
+  const [themeChoice, setThemeChoice] = useState<ThemeChoice>(loadThemeChoice)
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
   const dragRef = useRef<{ item: Item; source: DragSource } | null>(null)
   const dayTitleRefs = useRef<Array<HTMLTextAreaElement | null>>([])
@@ -189,6 +266,21 @@ function App() {
   useEffect(() => {
     dayTitleRefs.current.forEach(autoSizeDayTitle)
   }, [days])
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, themeChoice)
+
+    const applyTheme = () => {
+      document.documentElement.dataset.theme = resolveTheme(themeChoice)
+    }
+    applyTheme()
+
+    if (themeChoice !== 'system' || !window.matchMedia) return
+
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    media.addEventListener('change', applyTheme)
+    return () => media.removeEventListener('change', applyTheme)
+  }, [themeChoice])
 
   const addItem = () => {
     const text = newItemText.trim()
@@ -447,6 +539,7 @@ function App() {
           <div className="trip-dates">
             {getTripRangeLabel(days)}
           </div>
+          <ThemeChooser value={themeChoice} onChange={setThemeChoice} />
           <button className="trip-action-btn" onClick={addExtraDay}>
             Add day
           </button>

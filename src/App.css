@@ -48,7 +48,7 @@
   padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-soft);
   color: var(--text);
   font: 600 14px / 1 var(--sans);
   cursor: pointer;
@@ -62,6 +62,40 @@
 
 .trip-action-btn:active {
   transform: translateY(1px);
+}
+
+.theme-chooser {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  gap: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+}
+
+.theme-chooser-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.theme-chooser-btn:hover {
+  color: var(--text);
+}
+
+.theme-chooser-btn[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .days {
@@ -81,7 +115,7 @@
   width: 280px;
   border-radius: 22px;
   padding: 22px 20px 24px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: linear-gradient(160deg, var(--surface-card-from), var(--surface-card-to));
   border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
   display: flex;
@@ -116,7 +150,7 @@
 
 .day-title-input:focus {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-soft);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -131,8 +165,8 @@
   gap: 8px;
   padding: 12px;
   border-radius: 16px;
-  border: 1px dashed rgba(146, 133, 122, 0.35);
-  background: rgba(255, 255, 255, 0.56);
+  border: 1px dashed var(--border-dashed-soft);
+  background: var(--surface-translucent);
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
@@ -157,8 +191,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(146, 133, 122, 0.18);
+  background: var(--surface-soft);
+  border: 1px solid var(--border-dashed-soft);
   cursor: grab;
 }
 
@@ -232,8 +266,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed rgba(146, 133, 122, 0.3);
+  background: var(--surface-translucent);
+  border: 1px dashed var(--border-dashed-soft);
   cursor: grab;
   position: relative;
 }
@@ -294,7 +328,7 @@
 
 .meal-slot.drop-over,
 .day-list.drop-over {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface-soft);
 }
 
 .remove-btn.visible {
@@ -303,7 +337,7 @@
 
 /* Todo section */
 .todo-section {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: linear-gradient(160deg, var(--surface-card-from), var(--surface-card-to));
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 22px 24px 24px;
@@ -339,7 +373,7 @@
   padding: 9px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-soft);
   font: 14px / 1.4 var(--sans);
   color: var(--text);
   outline: none;
@@ -356,7 +390,7 @@
   border-radius: 12px;
   border: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
   font: 600 14px / 1 var(--sans);
   cursor: pointer;
   transition: opacity 0.15s;
@@ -387,8 +421,8 @@
   gap: 6px;
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed rgba(146, 133, 122, 0.4);
+  background: var(--surface-translucent);
+  border: 1px dashed var(--border-dashed);
   font-size: 14px;
   cursor: grab;
   user-select: none;
@@ -396,7 +430,7 @@
 }
 
 .todo-item:hover {
-  box-shadow: 0 4px 12px rgba(94, 73, 60, 0.12);
+  box-shadow: var(--shadow-hover);
   border-color: var(--accent);
 }
 

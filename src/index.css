@@ -4,21 +4,55 @@
   --text: #2d2a26;
   --muted: #6f665f;
   --bg: #f6f1ea;
+  --bg-gradient-top: #ffffff;
+  --bg-gradient-bottom: #efe7dd;
   --surface: #fbfaf7;
+  --surface-soft: rgba(255, 255, 255, 0.82);
+  --surface-translucent: rgba(255, 255, 255, 0.7);
+  --surface-card-from: rgba(255, 255, 255, 0.95);
+  --surface-card-to: rgba(243, 240, 233, 0.92);
   --border: rgba(154, 139, 126, 0.35);
+  --border-dashed: rgba(146, 133, 122, 0.4);
+  --border-dashed-soft: rgba(146, 133, 122, 0.3);
   --accent: #d06a3a;
+  --accent-contrast: #ffffff;
   --accent-soft: rgba(208, 106, 58, 0.15);
   --shadow-soft: 0 18px 40px rgba(94, 73, 60, 0.15);
+  --shadow-hover: 0 4px 12px rgba(94, 73, 60, 0.12);
 
   --sans: 'Space Grotesk', system-ui, sans-serif;
   --heading: 'Fraunces', 'Times New Roman', serif;
 
+  color-scheme: light;
   font: 16px/1.6 var(--sans);
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+:root[data-theme='dark'] {
+  --text: #f1ece4;
+  --muted: #9c958c;
+  --bg: #1a1714;
+  --bg-gradient-top: #2a2520;
+  --bg-gradient-bottom: #110f0d;
+  --surface: #221e1a;
+  --surface-soft: rgba(255, 255, 255, 0.06);
+  --surface-translucent: rgba(255, 255, 255, 0.04);
+  --surface-card-from: rgba(255, 255, 255, 0.05);
+  --surface-card-to: rgba(255, 255, 255, 0.02);
+  --border: rgba(229, 213, 197, 0.16);
+  --border-dashed: rgba(229, 213, 197, 0.22);
+  --border-dashed-soft: rgba(229, 213, 197, 0.16);
+  --accent: #e88454;
+  --accent-contrast: #1a1714;
+  --accent-soft: rgba(232, 132, 84, 0.18);
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
 }
 
 * {
@@ -28,7 +62,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, #efe7dd 100%);
+  background: radial-gradient(circle at top, var(--bg-gradient-top) 0%, var(--bg) 45%, var(--bg-gradient-bottom) 100%);
 }
 
 #root {
