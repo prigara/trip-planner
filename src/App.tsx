@@ -447,9 +447,9 @@ function App() {
           <div className="trip-dates">
             {getTripRangeLabel(days)}
           </div>
-          <button className="trip-action-btn" onClick={addExtraDay}>
+          <a className="trip-action-btn" onClick={addExtraDay} role="button" href="#">
             Add day
-          </button>
+          </a>
         </div>
       </header>
 

@@ -44,24 +44,17 @@
   font-weight: 600;
 }
 
-.trip-action-btn {
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.82);
-  color: var(--text);
-  font: 600 14px / 1 var(--sans);
+.trip-add-link {
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
-.trip-action-btn:hover {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.trip-action-btn:active {
-  transform: translateY(1px);
+.trip-add-link:hover {
+  color: var(--text);
 }
 
 .days {
