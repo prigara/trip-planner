@@ -7,6 +7,15 @@ type DragSource = 'todo' | { dayIndex: number; slot: DaySlot }
 type TripState = { days: Day[]; todoItems: Item[] }
 
 const STORAGE_KEY = 'trip-planner-state-v1'
+const THEME_KEY = 'trip-planner-theme'
+type Theme = 'light' | 'dark'
+
+const loadTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'light'
+  const stored = window.localStorage.getItem(THEME_KEY)
+  if (stored === 'light' || stored === 'dark') return stored
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+}
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
 const DATE_DISPLAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
@@ -165,6 +174,7 @@ function App() {
   const [{ days: initialStoredDays, todoItems: initialStoredTodoItems }] = useState(loadTripState)
   const [days, setDays] = useState<Day[]>(initialStoredDays)
   const [todoItems, setTodoItems] = useState<Item[]>(initialStoredTodoItems)
+  const [theme, setTheme] = useState<Theme>(loadTheme)
   const [newItemText, setNewItemText] = useState('')
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
   const dragRef = useRef<{ item: Item; source: DragSource } | null>(null)
@@ -189,6 +199,11 @@ function App() {
   useEffect(() => {
     dayTitleRefs.current.forEach(autoSizeDayTitle)
   }, [days])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    window.localStorage.setItem(THEME_KEY, theme)
+  }, [theme])
 
   const addItem = () => {
     const text = newItemText.trim()
@@ -447,6 +462,14 @@ function App() {
           <div className="trip-dates">
             {getTripRangeLabel(days)}
           </div>
+          <button
+            className="trip-action-btn theme-toggle"
+            onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
+          >
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
           <button className="trip-action-btn" onClick={addExtraDay}>
             Add day
           </button>

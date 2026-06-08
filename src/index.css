@@ -10,6 +10,15 @@
   --accent-soft: rgba(208, 106, 58, 0.15);
   --shadow-soft: 0 18px 40px rgba(94, 73, 60, 0.15);
 
+  /* Semantic surfaces (adapt per theme) */
+  --bg-gradient: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, #efe7dd 100%);
+  --card-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  --raised: rgba(255, 255, 255, 0.7);
+  --raised-strong: rgba(255, 255, 255, 0.9);
+  --raised-input: rgba(255, 255, 255, 0.82);
+  --item-border: rgba(146, 133, 122, 0.3);
+  --on-accent: #fff;
+
   --sans: 'Space Grotesk', system-ui, sans-serif;
   --heading: 'Fraunces', 'Times New Roman', serif;
 
@@ -21,6 +30,25 @@
   -webkit-font-smoothing: antialiased;
 }
 
+:root[data-theme='dark'] {
+  --text: #ece6df;
+  --muted: #9a9088;
+  --bg: #1a1714;
+  --surface: #26211c;
+  --border: rgba(154, 139, 126, 0.28);
+  --accent: #e8814f;
+  --accent-soft: rgba(232, 129, 79, 0.2);
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+
+  --bg-gradient: radial-gradient(circle at top, #2a241e 0%, var(--bg) 50%, #120f0d 100%);
+  --card-bg: linear-gradient(160deg, rgba(54, 46, 39, 0.95), rgba(38, 33, 28, 0.92));
+  --raised: rgba(255, 255, 255, 0.06);
+  --raised-strong: rgba(255, 255, 255, 0.1);
+  --raised-input: rgba(255, 255, 255, 0.08);
+  --item-border: rgba(180, 165, 150, 0.22);
+  --on-accent: #1a1714;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -28,7 +56,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, #efe7dd 100%);
+  background: var(--bg-gradient);
 }
 
 #root {
