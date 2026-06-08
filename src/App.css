@@ -48,7 +48,7 @@
   padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--raised-input);
   color: var(--text);
   font: 600 14px / 1 var(--sans);
   cursor: pointer;
@@ -62,6 +62,14 @@
 
 .trip-action-btn:active {
   transform: translateY(1px);
+}
+
+.theme-toggle {
+  width: 40px;
+  padding: 10px 0;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
 }
 
 .days {
@@ -81,7 +89,7 @@
   width: 280px;
   border-radius: 22px;
   padding: 22px 20px 24px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: var(--card-bg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
   display: flex;
@@ -116,7 +124,7 @@
 
 .day-title-input:focus {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--raised-input);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -131,8 +139,8 @@
   gap: 8px;
   padding: 12px;
   border-radius: 16px;
-  border: 1px dashed rgba(146, 133, 122, 0.35);
-  background: rgba(255, 255, 255, 0.56);
+  border: 1px dashed var(--item-border);
+  background: var(--raised);
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
@@ -157,8 +165,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(146, 133, 122, 0.18);
+  background: var(--raised-strong);
+  border: 1px solid var(--item-border);
   cursor: grab;
 }
 
@@ -232,8 +240,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed rgba(146, 133, 122, 0.3);
+  background: var(--raised);
+  border: 1px dashed var(--item-border);
   cursor: grab;
   position: relative;
 }
@@ -294,7 +302,7 @@
 
 .meal-slot.drop-over,
 .day-list.drop-over {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--raised-strong);
 }
 
 .remove-btn.visible {
@@ -303,7 +311,7 @@
 
 /* Todo section */
 .todo-section {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 22px 24px 24px;
@@ -339,7 +347,7 @@
   padding: 9px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--raised-input);
   font: 14px / 1.4 var(--sans);
   color: var(--text);
   outline: none;
@@ -356,7 +364,7 @@
   border-radius: 12px;
   border: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font: 600 14px / 1 var(--sans);
   cursor: pointer;
   transition: opacity 0.15s;
@@ -387,8 +395,8 @@
   gap: 6px;
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed rgba(146, 133, 122, 0.4);
+  background: var(--raised);
+  border: 1px dashed var(--item-border);
   font-size: 14px;
   cursor: grab;
   user-select: none;
