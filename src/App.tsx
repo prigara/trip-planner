@@ -447,7 +447,14 @@ function App() {
           <div className="trip-dates">
             {getTripRangeLabel(days)}
           </div>
-          <a className="trip-action-btn" onClick={addExtraDay} role="button" href="#">
+          <a
+            className="trip-add-link"
+            onClick={e => {
+              e.preventDefault()
+              addExtraDay()
+            }}
+            href="#"
+          >
             Add day
           </a>
         </div>
