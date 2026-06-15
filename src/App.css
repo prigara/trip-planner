@@ -45,6 +45,10 @@
 }
 
 .trip-add-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
   color: var(--accent);
   font-size: 14px;
   font-weight: 700;
@@ -55,6 +59,23 @@
 
 .trip-add-link:hover {
   color: var(--text);
+}
+
+.trip-nav-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.trip-nav-link:hover {
+  color: var(--accent);
 }
 
 .days {
@@ -204,7 +225,6 @@
 
 .day-list {
   list-style: none;
-  padding: 0;
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -430,6 +450,114 @@
 .todo-remove-btn:hover {
   background: var(--accent-soft);
   color: var(--accent);
+}
+
+/* Trip list */
+.trip-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trip-list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.trip-list-item:hover {
+  border-color: var(--accent);
+}
+
+.trip-list-item.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft), var(--shadow-soft);
+}
+
+.trip-list-destination {
+  font-family: var(--heading);
+  font-size: 20px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.trip-list-range {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.trip-list-count {
+  padding: 6px 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* New trip form */
+.new-trip-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 520px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+}
+
+.new-trip-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.new-trip-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.new-trip-dates {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.new-trip-error {
+  margin: 0;
+  color: #b3261e;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.new-trip-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 @media (max-width: 980px) {

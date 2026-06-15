@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import './App.css'
 
 type Item = { id: string; text: string }
 type DaySlot = 'items' | 'lunch' | 'dinner'
 type DragSource = 'todo' | { dayIndex: number; slot: DaySlot }
-type TripState = { days: Day[]; todoItems: Item[] }
+type Trip = { id: string; destination: string; days: Day[]; todoItems: Item[] }
+type AppState = { trips: Trip[]; activeTripId: string | null }
+type View = 'planner' | 'list' | 'new'
 
-const STORAGE_KEY = 'trip-planner-state-v1'
+const STORAGE_KEY = 'trip-planner-state-v2'
+const LEGACY_STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
 const DATE_DISPLAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
@@ -107,34 +111,79 @@ const isDay = (value: unknown): value is Day => {
   )
 }
 
-const loadTripState = (): TripState => {
+const isTrip = (value: unknown): value is Trip => {
+  if (!value || typeof value !== 'object') return false
+
+  const candidate = value as Record<string, unknown>
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.destination === 'string' &&
+    Array.isArray(candidate.days) &&
+    candidate.days.every(isDay) &&
+    Array.isArray(candidate.todoItems) &&
+    candidate.todoItems.every(isItem)
+  )
+}
+
+const seedParisTrip = (): Trip => ({
+  id: mkId(),
+  destination: 'Paris',
+  days: initialDays,
+  todoItems: [],
+})
+
+const defaultAppState = (): AppState => {
+  const paris = seedParisTrip()
+  return { trips: [paris], activeTripId: paris.id }
+}
+
+const loadAppState = (): AppState => {
   if (typeof window === 'undefined') {
-    return { days: initialDays, todoItems: [] }
+    return defaultAppState()
   }
 
   try {
     const rawState = window.localStorage.getItem(STORAGE_KEY)
-    if (!rawState) {
-      return { days: initialDays, todoItems: [] }
-    }
-
-    const parsedState = JSON.parse(rawState) as Partial<TripState>
-    if (
-      Array.isArray(parsedState.days) &&
-      parsedState.days.every(isDay) &&
-      Array.isArray(parsedState.todoItems) &&
-      parsedState.todoItems.every(isItem)
-    ) {
-      return {
-        days: parsedState.days,
-        todoItems: parsedState.todoItems,
+    if (rawState) {
+      const parsedState = JSON.parse(rawState) as Partial<AppState>
+      if (Array.isArray(parsedState.trips) && parsedState.trips.every(isTrip)) {
+        const trips = parsedState.trips
+        const activeTripId =
+          typeof parsedState.activeTripId === 'string' &&
+          trips.some(trip => trip.id === parsedState.activeTripId)
+            ? parsedState.activeTripId
+            : (trips[0]?.id ?? null)
+        return { trips, activeTripId }
       }
     }
   } catch {
     window.localStorage.removeItem(STORAGE_KEY)
   }
 
-  return { days: initialDays, todoItems: [] }
+  try {
+    const legacyRaw = window.localStorage.getItem(LEGACY_STORAGE_KEY)
+    if (legacyRaw) {
+      const legacyState = JSON.parse(legacyRaw) as Partial<{ days: Day[]; todoItems: Item[] }>
+      if (
+        Array.isArray(legacyState.days) &&
+        legacyState.days.every(isDay) &&
+        Array.isArray(legacyState.todoItems) &&
+        legacyState.todoItems.every(isItem)
+      ) {
+        const migratedTrip: Trip = {
+          id: mkId(),
+          destination: 'Paris',
+          days: legacyState.days,
+          todoItems: legacyState.todoItems,
+        }
+        return { trips: [migratedTrip], activeTripId: migratedTrip.id }
+      }
+    }
+  } catch {
+    // Ignore malformed legacy state and fall through to the seeded default.
+  }
+
+  return defaultAppState()
 }
 
 const parseDayDate = (dateLabel: string) => {
@@ -161,10 +210,42 @@ const getTripRangeLabel = (days: Day[]) => {
   return `${formatHeaderDate(firstDate)} • ${formatHeaderDate(lastDate)}`
 }
 
-function App() {
-  const [{ days: initialStoredDays, todoItems: initialStoredTodoItems }] = useState(loadTripState)
-  const [days, setDays] = useState<Day[]>(initialStoredDays)
-  const [todoItems, setTodoItems] = useState<Item[]>(initialStoredTodoItems)
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+const buildDaysForRange = (startISO: string, endISO: string): Day[] => {
+  const start = new Date(`${startISO}T00:00:00Z`)
+  const end = new Date(`${endISO}T00:00:00Z`)
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end < start) {
+    return []
+  }
+
+  const days: Day[] = []
+  let dayNumber = 1
+  for (let time = start.getTime(); time <= end.getTime(); time += MS_PER_DAY) {
+    days.push({
+      label: `Day ${dayNumber}`,
+      date: formatDayDate(new Date(time)),
+      title: '',
+      items: [],
+      lunch: null,
+      dinner: null,
+    })
+    dayNumber += 1
+  }
+
+  return days
+}
+
+type TripPlannerProps = {
+  trip: Trip
+  setDays: Dispatch<SetStateAction<Day[]>>
+  setTodoItems: Dispatch<SetStateAction<Item[]>>
+  onShowAllTrips: () => void
+}
+
+function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips }: TripPlannerProps) {
+  const { days, todoItems } = trip
   const [newItemText, setNewItemText] = useState('')
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
   const dragRef = useRef<{ item: Item; source: DragSource } | null>(null)
@@ -177,16 +258,6 @@ function App() {
     element.style.height = '0px'
     element.style.height = `${element.scrollHeight}px`
   }
-
-  useEffect(() => {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        days,
-        todoItems,
-      } satisfies TripState),
-    )
-  }, [days, todoItems])
 
   useEffect(() => {
     dayTitleRefs.current.forEach(autoSizeDayTitle)
@@ -281,7 +352,7 @@ function App() {
       const nextDayNumber = prev.length + 1
       const lastDayDate = lastDay ? parseDayDate(lastDay.date) : null
       const nextDate = lastDayDate
-        ? new Date(lastDayDate.getTime() + 24 * 60 * 60 * 1000)
+        ? new Date(lastDayDate.getTime() + MS_PER_DAY)
         : null
 
       pendingAddedDayIndexRef.current = prev.length
@@ -316,12 +387,12 @@ function App() {
       const remainingDays = prev.filter((_, i) => i !== dayIndex)
       if (remainingDays.length === 0) return []
 
-      const firstDay = prev[0]
+      const firstDay = remainingDays[0]
       const firstDate = parseDayDate(firstDay.date)
 
       return remainingDays.map((day, i) => {
         const nextDate = firstDate
-          ? new Date(firstDate.getTime() + i * 24 * 60 * 60 * 1000)
+          ? new Date(firstDate.getTime() + i * MS_PER_DAY)
           : null
 
         return {
@@ -463,22 +534,18 @@ function App() {
       <header className="trip-header">
         <div>
           <p className="eyebrow">Trip</p>
-          <h1>Paris</h1>
+          <h1>{trip.destination}</h1>
         </div>
         <div className="trip-actions">
           <div className="trip-dates">
             {getTripRangeLabel(days)}
           </div>
-          <a
-            className="trip-add-link"
-            onClick={e => {
-              e.preventDefault()
-              addExtraDay()
-            }}
-            href="#"
-          >
+          <button type="button" className="trip-nav-link" onClick={onShowAllTrips}>
+            All trips
+          </button>
+          <button type="button" className="trip-add-link" onClick={addExtraDay}>
             Add day
-          </a>
+          </button>
         </div>
       </header>
 
@@ -638,6 +705,222 @@ function App() {
         ))}
       </section>
     </div>
+  )
+}
+
+type TripListProps = {
+  trips: Trip[]
+  activeTripId: string | null
+  onSelectTrip: (tripId: string) => void
+  onNewTrip: () => void
+}
+
+function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProps) {
+  return (
+    <div className="app">
+      <header className="trip-header">
+        <div>
+          <p className="eyebrow">Trips</p>
+          <h1>All trips</h1>
+        </div>
+        <div className="trip-actions">
+          <button className="todo-add-btn" onClick={onNewTrip}>
+            Plan a new trip
+          </button>
+        </div>
+      </header>
+
+      <ul className="trip-list">
+        {trips.map(trip => (
+          <li key={trip.id}>
+            <button
+              className={`trip-list-item${trip.id === activeTripId ? ' active' : ''}`}
+              onClick={() => onSelectTrip(trip.id)}
+            >
+              <span className="trip-list-destination">{trip.destination}</span>
+              <span className="trip-list-range">{getTripRangeLabel(trip.days)}</span>
+              <span className="trip-list-count">
+                {trip.days.length} {trip.days.length === 1 ? 'day' : 'days'}
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+type NewTripFormProps = {
+  onCreate: (trip: Trip) => void
+  onCancel: () => void
+}
+
+function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
+  const [destination, setDestination] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const trimmedDestination = destination.trim()
+    if (!trimmedDestination) {
+      setError('Enter a destination.')
+      return
+    }
+    if (!startDate || !endDate) {
+      setError('Choose start and end dates.')
+      return
+    }
+    if (endDate < startDate) {
+      setError('End date must be on or after the start date.')
+      return
+    }
+
+    const days = buildDaysForRange(startDate, endDate)
+    if (days.length === 0) {
+      setError('Choose a valid date range.')
+      return
+    }
+
+    onCreate({
+      id: mkId(),
+      destination: trimmedDestination,
+      days,
+      todoItems: [],
+    })
+  }
+
+  return (
+    <div className="app">
+      <header className="trip-header">
+        <div>
+          <p className="eyebrow">Trips</p>
+          <h1>Plan a new trip</h1>
+        </div>
+        <div className="trip-actions">
+          <button type="button" className="trip-nav-link" onClick={onCancel}>
+            All trips
+          </button>
+        </div>
+      </header>
+
+      <form className="new-trip-form" onSubmit={handleSubmit}>
+        <label className="new-trip-field">
+          <span className="new-trip-label">Destination</span>
+          <input
+            className="todo-input"
+            value={destination}
+            onChange={e => setDestination(e.target.value)}
+            placeholder="e.g. Lisbon"
+            aria-label="Destination"
+          />
+        </label>
+        <div className="new-trip-dates">
+          <label className="new-trip-field">
+            <span className="new-trip-label">Start date</span>
+            <input
+              className="todo-input"
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              aria-label="Start date"
+            />
+          </label>
+          <label className="new-trip-field">
+            <span className="new-trip-label">End date</span>
+            <input
+              className="todo-input"
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+              aria-label="End date"
+            />
+          </label>
+        </div>
+        {error && <p className="new-trip-error">{error}</p>}
+        <div className="new-trip-actions">
+          <button className="todo-add-btn" type="submit">
+            Create trip
+          </button>
+          <button type="button" className="trip-nav-link" onClick={onCancel}>
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+function App() {
+  const [appState, setAppState] = useState<AppState>(loadAppState)
+  const [view, setView] = useState<View>('planner')
+
+  const { trips, activeTripId } = appState
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState))
+  }, [appState])
+
+  const updateActiveTrip = (updater: (trip: Trip) => Trip) => {
+    setAppState(prev => ({
+      ...prev,
+      trips: prev.trips.map(trip => (trip.id === prev.activeTripId ? updater(trip) : trip)),
+    }))
+  }
+
+  const setDays: Dispatch<SetStateAction<Day[]>> = value => {
+    updateActiveTrip(trip => ({
+      ...trip,
+      days: typeof value === 'function' ? (value as (prev: Day[]) => Day[])(trip.days) : value,
+    }))
+  }
+
+  const setTodoItems: Dispatch<SetStateAction<Item[]>> = value => {
+    updateActiveTrip(trip => ({
+      ...trip,
+      todoItems:
+        typeof value === 'function' ? (value as (prev: Item[]) => Item[])(trip.todoItems) : value,
+    }))
+  }
+
+  const selectTrip = (tripId: string) => {
+    setAppState(prev => ({ ...prev, activeTripId: tripId }))
+    setView('planner')
+  }
+
+  const createTrip = (trip: Trip) => {
+    setAppState(prev => ({ trips: [...prev.trips, trip], activeTripId: trip.id }))
+    setView('planner')
+  }
+
+  const activeTrip = trips.find(trip => trip.id === activeTripId) ?? null
+  const effectiveView = trips.length === 0 ? 'new' : view
+
+  if (effectiveView === 'new') {
+    return <NewTripForm onCreate={createTrip} onCancel={() => setView('list')} />
+  }
+
+  if (effectiveView === 'list' || !activeTrip) {
+    return (
+      <TripList
+        trips={trips}
+        activeTripId={activeTripId}
+        onSelectTrip={selectTrip}
+        onNewTrip={() => setView('new')}
+      />
+    )
+  }
+
+  return (
+    <TripPlanner
+      key={activeTrip.id}
+      trip={activeTrip}
+      setDays={setDays}
+      setTodoItems={setTodoItems}
+      onShowAllTrips={() => setView('list')}
+    />
   )
 }
 
