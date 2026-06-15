@@ -169,6 +169,8 @@ function App() {
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
   const dragRef = useRef<{ item: Item; source: DragSource } | null>(null)
   const dayTitleRefs = useRef<Array<HTMLTextAreaElement | null>>([])
+  const dayCardRefs = useRef<Array<HTMLElement | null>>([])
+  const pendingAddedDayIndexRef = useRef<number | null>(null)
 
   const autoSizeDayTitle = (element: HTMLTextAreaElement | null) => {
     if (!element) return
@@ -188,6 +190,24 @@ function App() {
 
   useEffect(() => {
     dayTitleRefs.current.forEach(autoSizeDayTitle)
+  }, [days])
+
+  useEffect(() => {
+    const addedDayIndex = pendingAddedDayIndexRef.current
+    if (addedDayIndex === null) return
+
+    const addedDayCard = dayCardRefs.current[addedDayIndex]
+    pendingAddedDayIndexRef.current = null
+
+    if (!addedDayCard) return
+
+    requestAnimationFrame(() => {
+      addedDayCard.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'end',
+      })
+    })
   }, [days])
 
   const addItem = () => {
@@ -263,6 +283,8 @@ function App() {
       const nextDate = lastDayDate
         ? new Date(lastDayDate.getTime() + 24 * 60 * 60 * 1000)
         : null
+
+      pendingAddedDayIndexRef.current = prev.length
 
       return [
         ...prev,
@@ -506,7 +528,13 @@ function App() {
 
       <section className="days" aria-label="Trip days">
         {days.map((day, dayIndex) => (
-          <article key={`${day.label}-${day.date}`} className="day-card">
+          <article
+            key={`${day.label}-${day.date}`}
+            className="day-card"
+            ref={element => {
+              dayCardRefs.current[dayIndex] = element
+            }}
+          >
             <div className="day-meta">
               <span className="day-pill">{day.label}</span>
               <div className="day-meta-actions">
