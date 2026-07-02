@@ -242,9 +242,10 @@ type TripPlannerProps = {
   setDays: Dispatch<SetStateAction<Day[]>>
   setTodoItems: Dispatch<SetStateAction<Item[]>>
   onShowAllTrips: () => void
+  onNewTrip: () => void
 }
 
-function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips }: TripPlannerProps) {
+function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }: TripPlannerProps) {
   const { days, todoItems } = trip
   const [newItemText, setNewItemText] = useState('')
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
@@ -534,7 +535,12 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips }: TripPlanne
       <header className="trip-header">
         <div>
           <p className="eyebrow">Trip</p>
-          <h1>{trip.destination}</h1>
+          <div className="trip-title-row">
+            <h1>{trip.destination}</h1>
+            <button type="button" className="trip-add-link" onClick={onNewTrip}>
+              Add new trip
+            </button>
+          </div>
         </div>
         <div className="trip-actions">
           <div className="trip-dates">
@@ -920,6 +926,7 @@ function App() {
       setDays={setDays}
       setTodoItems={setTodoItems}
       onShowAllTrips={() => setView('list')}
+      onNewTrip={() => setView('new')}
     />
   )
 }

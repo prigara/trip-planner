@@ -32,6 +32,13 @@
   margin: 0;
 }
 
+.trip-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .trip-dates {
   display: inline-flex;
   align-items: center;
