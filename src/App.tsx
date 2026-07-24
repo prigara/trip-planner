@@ -11,6 +11,17 @@ type View = 'planner' | 'list' | 'new'
 
 const STORAGE_KEY = 'trip-planner-state-v2'
 const LEGACY_STORAGE_KEY = 'trip-planner-state-v1'
+const THEME_STORAGE_KEY = 'trip-planner-theme'
+
+type Theme = 'warm' | 'purple'
+const THEMES: Theme[] = ['warm', 'purple']
+
+const loadTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'warm'
+  const stored = window.localStorage.getItem(THEME_STORAGE_KEY)
+  return stored === 'purple' || stored === 'warm' ? stored : 'warm'
+}
+
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
 const DATE_DISPLAY_FORMATTER = new Intl.DateTimeFormat('en-US', {
@@ -853,15 +864,46 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
   )
 }
 
+type ThemeToggleProps = {
+  theme: Theme
+  onToggle: () => void
+}
+
+function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
+  const nextTheme = theme === 'warm' ? 'purple' : 'warm'
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={onToggle}
+      aria-label={`Switch to ${nextTheme} theme`}
+      title={`Switch to ${nextTheme} theme`}
+    >
+      <span className="theme-toggle-swatch" aria-hidden="true" />
+      {theme === 'warm' ? 'Purple' : 'Warm'}
+    </button>
+  )
+}
+
 function App() {
   const [appState, setAppState] = useState<AppState>(loadAppState)
   const [view, setView] = useState<View>('planner')
+  const [theme, setTheme] = useState<Theme>(loadTheme)
 
   const { trips, activeTripId } = appState
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState))
   }, [appState])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme(prev => THEMES[(THEMES.indexOf(prev) + 1) % THEMES.length])
+  }
 
   const updateActiveTrip = (updater: (trip: Trip) => Trip) => {
     setAppState(prev => ({
@@ -898,12 +940,11 @@ function App() {
   const activeTrip = trips.find(trip => trip.id === activeTripId) ?? null
   const effectiveView = trips.length === 0 ? 'new' : view
 
+  let content
   if (effectiveView === 'new') {
-    return <NewTripForm onCreate={createTrip} onCancel={() => setView('list')} />
-  }
-
-  if (effectiveView === 'list' || !activeTrip) {
-    return (
+    content = <NewTripForm onCreate={createTrip} onCancel={() => setView('list')} />
+  } else if (effectiveView === 'list' || !activeTrip) {
+    content = (
       <TripList
         trips={trips}
         activeTripId={activeTripId}
@@ -911,16 +952,23 @@ function App() {
         onNewTrip={() => setView('new')}
       />
     )
+  } else {
+    content = (
+      <TripPlanner
+        key={activeTrip.id}
+        trip={activeTrip}
+        setDays={setDays}
+        setTodoItems={setTodoItems}
+        onShowAllTrips={() => setView('list')}
+      />
+    )
   }
 
   return (
-    <TripPlanner
-      key={activeTrip.id}
-      trip={activeTrip}
-      setDays={setDays}
-      setTodoItems={setTodoItems}
-      onShowAllTrips={() => setView('list')}
-    />
+    <>
+      <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      {content}
+    </>
   )
 }
 
