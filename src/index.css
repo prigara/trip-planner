@@ -1,14 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 :root {
-  --text: #2d2a26;
-  --muted: #6f665f;
-  --bg: #f6f1ea;
-  --surface: #fbfaf7;
-  --border: rgba(154, 139, 126, 0.35);
-  --accent: #d06a3a;
-  --accent-soft: rgba(208, 106, 58, 0.15);
-  --shadow-soft: 0 18px 40px rgba(94, 73, 60, 0.15);
+  --text: #2b2340;
+  --muted: #6f6685;
+  --bg: #f5f1fa;
+  --bg-deep: #ece4f8;
+  --surface: #fdfcff;
+  --surface-tint: rgba(242, 237, 251, 0.92);
+  --border: rgba(140, 120, 175, 0.35);
+  --border-dashed: rgba(124, 104, 168, 0.35);
+  --border-faint: rgba(124, 104, 168, 0.18);
+  --accent: #7c4dcc;
+  --accent-soft: rgba(124, 77, 204, 0.15);
+  --shadow-soft: 0 18px 40px rgba(70, 45, 120, 0.15);
+  --shadow-hover: 0 4px 12px rgba(70, 45, 120, 0.14);
 
   --sans: 'Space Grotesk', system-ui, sans-serif;
   --heading: 'Fraunces', 'Times New Roman', serif;
@@ -28,7 +33,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, #efe7dd 100%);
+  background: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, var(--bg-deep) 100%);
 }
 
 #root {
