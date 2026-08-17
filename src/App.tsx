@@ -3,7 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import './App.css'
 
 type Item = { id: string; text: string }
-type DaySlot = 'items' | 'lunch' | 'dinner'
+type DaySlot = 'items' | 'breakfast' | 'lunch' | 'dinner'
 type DragSource = 'todo' | { dayIndex: number; slot: DaySlot }
 type Trip = { id: string; destination: string; days: Day[]; todoItems: Item[] }
 type AppState = { trips: Trip[]; activeTripId: string | null }
@@ -31,6 +31,7 @@ type Day = {
   date: string
   title: string
   items: Item[]
+  breakfast: Item | null
   lunch: Item | null
   dinner: Item | null
 }
@@ -41,6 +42,7 @@ const initialDays: Day[] = [
     date: 'Apr 30',
     title: 'Arrival + Montmartre',
     items: ['Land at CDG', 'Check in', 'Sacré-Cœur sunset'].map(mkItem),
+    breakfast: null,
     lunch: null,
     dinner: null,
   },
@@ -49,6 +51,7 @@ const initialDays: Day[] = [
     date: 'May 1',
     title: 'Louvre + Seine',
     items: ['Louvre highlights', 'Tuileries stroll', 'Evening cruise'].map(mkItem),
+    breakfast: null,
     lunch: null,
     dinner: null,
   },
@@ -57,6 +60,7 @@ const initialDays: Day[] = [
     date: 'May 2',
     title: 'Le Marais',
     items: ['Café hop', 'Vintage shops', 'Picasso Museum'].map(mkItem),
+    breakfast: null,
     lunch: null,
     dinner: null,
   },
@@ -65,6 +69,7 @@ const initialDays: Day[] = [
     date: 'May 3',
     title: 'Latin Quarter',
     items: ['Panthéon', 'Bookstores', 'Luxembourg Gardens'].map(mkItem),
+    breakfast: null,
     lunch: null,
     dinner: null,
   },
@@ -73,6 +78,7 @@ const initialDays: Day[] = [
     date: 'May 4',
     title: 'Final Paris Day',
     items: dayFiveItems.map(mkItem),
+    breakfast: null,
     lunch: null,
     dinner: null,
   },
@@ -81,6 +87,7 @@ const initialDays: Day[] = [
     date: 'May 5',
     title: 'Midday Train Departure',
     items: daySixItems.map(mkItem),
+    breakfast: null,
     lunch: null,
     dinner: null,
   },
@@ -97,6 +104,7 @@ const isDay = (value: unknown): value is Day => {
   if (!value || typeof value !== 'object') return false
 
   const candidate = value as Record<string, unknown>
+  const breakfast = candidate.breakfast
   const lunch = candidate.lunch
   const dinner = candidate.dinner
 
@@ -106,6 +114,7 @@ const isDay = (value: unknown): value is Day => {
     typeof candidate.title === 'string' &&
     Array.isArray(candidate.items) &&
     candidate.items.every(isItem) &&
+    (breakfast === null || isItem(breakfast)) &&
     (lunch === null || isItem(lunch)) &&
     (dinner === null || isItem(dinner))
   )
@@ -228,6 +237,7 @@ const buildDaysForRange = (startISO: string, endISO: string): Day[] => {
       date: formatDayDate(new Date(time)),
       title: '',
       items: [],
+      breakfast: null,
       lunch: null,
       dinner: null,
     })
@@ -364,6 +374,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips }: TripPlanne
           date: nextDate ? formatDayDate(nextDate) : `Day ${nextDayNumber}`,
           title: 'Extra day',
           items: [],
+          breakfast: null,
           lunch: null,
           dinner: null,
         },
@@ -375,6 +386,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips }: TripPlanne
     const dayToRemove = days[dayIndex]
     const itemsToReturn = [
       ...dayToRemove.items,
+      ...(dayToRemove.breakfast ? [dayToRemove.breakfast] : []),
       ...(dayToRemove.lunch ? [dayToRemove.lunch] : []),
       ...(dayToRemove.dinner ? [dayToRemove.dinner] : []),
     ]
@@ -633,7 +645,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips }: TripPlanne
               rows={1}
             />
             <div className="meal-section">
-              {(['lunch', 'dinner'] as const).map(slot => (
+              {(['breakfast', 'lunch', 'dinner'] as const).map(slot => (
                 <div
                   key={slot}
                   className={`meal-slot${
