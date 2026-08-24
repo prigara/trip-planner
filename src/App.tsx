@@ -536,10 +536,10 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
         <div className="trip-header-row trip-header-row-global">
           <p className="eyebrow">Trip</p>
           <div className="trip-actions">
-            <button type="button" className="trip-add-link" onClick={onNewTrip}>
-              Add new trip
+            <button type="button" className="header-link" onClick={onNewTrip}>
+              Plan a new trip
             </button>
-            <button type="button" className="trip-nav-link" onClick={onShowAllTrips}>
+            <button type="button" className="header-link" onClick={onShowAllTrips}>
               Show all trips
             </button>
           </div>
@@ -730,10 +730,7 @@ function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProp
         <div className="trip-header-row">
           <div>
             <p className="eyebrow">Trips</p>
-            <h1>All trips</h1>
-          </div>
-          <div className="trip-actions">
-            <button className="todo-add-btn" onClick={onNewTrip}>
+            <button type="button" className="header-link" onClick={onNewTrip}>
               Plan a new trip
             </button>
           </div>
@@ -811,7 +808,7 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
             <h1>Plan a new trip</h1>
           </div>
           <div className="trip-actions">
-            <button type="button" className="trip-nav-link" onClick={onCancel}>
+            <button type="button" className="header-link" onClick={onCancel}>
               Show all trips
             </button>
           </div>
