@@ -28,6 +28,16 @@
   margin: 0;
 }
 
+.trip-header-row-trip {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* keeps the dates + Add day cluster on the right, even once the row wraps */
+.trip-header-row-trip .trip-actions {
+  margin-left: auto;
+}
+
 .trip-actions {
   display: flex;
   align-items: center;
@@ -48,11 +58,9 @@
   margin: 0;
 }
 
-.trip-title-row {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
+.trip-destination {
+  /* tight leading so the title optically centres against the pill and link */
+  line-height: 1;
 }
 
 .trip-dates {
@@ -68,10 +76,13 @@
 }
 
 .trip-add-link {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: none;
   background: none;
   font-family: inherit;
+  line-height: 1.2;
   color: var(--accent);
   font-size: 14px;
   font-weight: 700;
@@ -85,10 +96,13 @@
 }
 
 .trip-nav-link {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: none;
   background: none;
   font-family: inherit;
+  line-height: 1.2;
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
@@ -593,7 +607,8 @@
     align-items: flex-start;
   }
 
-  .trip-header-row-global {
+  .trip-header-row-global,
+  .trip-header-row-trip {
     flex-direction: row;
     align-items: center;
     flex-wrap: wrap;

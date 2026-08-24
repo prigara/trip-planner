@@ -544,14 +544,12 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
             </button>
           </div>
         </div>
-        <div className="trip-header-row">
-          <div className="trip-title-row">
-            <h1>{trip.destination}</h1>
+        <div className="trip-header-row trip-header-row-trip">
+          <h1 className="trip-destination">{trip.destination}</h1>
+          <div className="trip-actions">
             <div className="trip-dates">
               {getTripRangeLabel(days)}
             </div>
-          </div>
-          <div className="trip-actions">
             <button type="button" className="trip-add-link" onClick={addExtraDay}>
               Add day
             </button>
