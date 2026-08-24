@@ -7,9 +7,25 @@
 
 .trip-header {
   display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.trip-header-row {
+  display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 24px;
+}
+
+.trip-header-row-global {
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.trip-header-row-global .eyebrow {
+  margin: 0;
 }
 
 .trip-actions {
@@ -34,8 +50,8 @@
 
 .trip-title-row {
   display: flex;
-  align-items: baseline;
-  gap: 16px;
+  align-items: center;
+  gap: 18px;
   flex-wrap: wrap;
 }
 
@@ -572,9 +588,15 @@
     padding: 36px 24px 48px;
   }
 
-  .trip-header {
+  .trip-header-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .trip-header-row-global {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
   .trip-actions {

@@ -533,25 +533,29 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
   return (
     <div className="app">
       <header className="trip-header">
-        <div>
+        <div className="trip-header-row trip-header-row-global">
           <p className="eyebrow">Trip</p>
-          <div className="trip-title-row">
-            <h1>{trip.destination}</h1>
+          <div className="trip-actions">
             <button type="button" className="trip-add-link" onClick={onNewTrip}>
               Add new trip
             </button>
+            <button type="button" className="trip-nav-link" onClick={onShowAllTrips}>
+              Show all trips
+            </button>
           </div>
         </div>
-        <div className="trip-actions">
-          <div className="trip-dates">
-            {getTripRangeLabel(days)}
+        <div className="trip-header-row">
+          <div className="trip-title-row">
+            <h1>{trip.destination}</h1>
+            <div className="trip-dates">
+              {getTripRangeLabel(days)}
+            </div>
           </div>
-          <button type="button" className="trip-nav-link" onClick={onShowAllTrips}>
-            All trips
-          </button>
-          <button type="button" className="trip-add-link" onClick={addExtraDay}>
-            Add day
-          </button>
+          <div className="trip-actions">
+            <button type="button" className="trip-add-link" onClick={addExtraDay}>
+              Add day
+            </button>
+          </div>
         </div>
       </header>
 
@@ -725,14 +729,16 @@ function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProp
   return (
     <div className="app">
       <header className="trip-header">
-        <div>
-          <p className="eyebrow">Trips</p>
-          <h1>All trips</h1>
-        </div>
-        <div className="trip-actions">
-          <button className="todo-add-btn" onClick={onNewTrip}>
-            Plan a new trip
-          </button>
+        <div className="trip-header-row">
+          <div>
+            <p className="eyebrow">Trips</p>
+            <h1>All trips</h1>
+          </div>
+          <div className="trip-actions">
+            <button className="todo-add-btn" onClick={onNewTrip}>
+              Plan a new trip
+            </button>
+          </div>
         </div>
       </header>
 
@@ -801,14 +807,16 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
   return (
     <div className="app">
       <header className="trip-header">
-        <div>
-          <p className="eyebrow">Trips</p>
-          <h1>Plan a new trip</h1>
-        </div>
-        <div className="trip-actions">
-          <button type="button" className="trip-nav-link" onClick={onCancel}>
-            All trips
-          </button>
+        <div className="trip-header-row">
+          <div>
+            <p className="eyebrow">Trips</p>
+            <h1>Plan a new trip</h1>
+          </div>
+          <div className="trip-actions">
+            <button type="button" className="trip-nav-link" onClick={onCancel}>
+              Show all trips
+            </button>
+          </div>
         </div>
       </header>
 
