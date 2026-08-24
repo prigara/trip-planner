@@ -75,9 +75,27 @@
   font-weight: 600;
 }
 
-/* shared look for every header action link */
-.trip-add-link,
-.header-link {
+/* shared look for every header action button */
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: 600 14px / 1 var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.header-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.trip-add-link {
   display: inline-flex;
   align-items: center;
   padding: 0;
@@ -93,8 +111,7 @@
   cursor: pointer;
 }
 
-.trip-add-link:hover,
-.header-link:hover {
+.trip-add-link:hover {
   color: var(--text);
 }
 
