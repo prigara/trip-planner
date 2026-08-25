@@ -30,6 +30,9 @@
 
 .trip-header h1 {
   margin: 0;
+  /* Trim the inherited 1.6 leading so the header's flex-end alignment lines the
+     action buttons up with the heading's visual baseline, not the line box. */
+  line-height: 1.1;
 }
 
 .trip-title-row {
