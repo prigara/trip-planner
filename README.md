@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# Trip Planner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A small single-page app for laying out a trip itinerary day by day.
 
-Currently, two official plugins are available:
+You create a trip by giving it a destination and a start/end date — the app
+generates one card per day in the range. Activity ideas go into a shared
+"Ideas" pool, and you drag them onto the day you want: into the day's activity
+list (reorderable by dropping between items) or into its dedicated **lunch** and
+**dinner** slots. Dragging an item back, or clicking its ×, returns it to the
+pool. Each day also has a free-text title, and you can add or remove days after
+the fact — remaining days are renumbered and re-dated automatically, and any
+items on a removed day go back to the Ideas pool.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+You can keep several trips side by side and switch between them from the trip
+list. Everything is stored in the browser's `localStorage` (key
+`trip-planner-state-v2`) — there is no backend and no account. A sample Paris
+trip is seeded on first run.
 
-## React Compiler
+## Tech stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+React 19 + TypeScript, built with Vite. No state library, no router, and no
+runtime dependencies beyond React — the whole app lives in
+[App.tsx](air-file://lasjqteqhjilpe1f1748/workspaces/trip-planner/src/App.tsx?type=file&root=%252F).
 
-## Expanding the ESLint configuration
+## Running it
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Requires Node.js 20.19+ (or 22.12+) for Vite 8.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Then open the URL Vite prints (http://localhost:5173 by default).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Other scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the dev server with hot reload |
+| `npm run build` | Type-check (`tsc -b`) and build to `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | Run ESLint over the project |
