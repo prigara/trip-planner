@@ -7,9 +7,35 @@
 
 .trip-header {
   display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.trip-header-row {
+  display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 24px;
+}
+
+.trip-header-row-global {
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.trip-header-row-global .eyebrow {
+  margin: 0;
+}
+
+.trip-header-row-trip {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* keeps the dates + Add day cluster on the right, even once the row wraps */
+.trip-header-row-trip .trip-actions {
+  margin-left: auto;
 }
 
 .trip-actions {
@@ -32,11 +58,9 @@
   margin: 0;
 }
 
-.trip-title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  flex-wrap: wrap;
+.trip-destination {
+  /* tight leading so the title optically centres against the pill and link */
+  line-height: 1;
 }
 
 .trip-dates {
@@ -51,11 +75,34 @@
   font-weight: 600;
 }
 
+/* shared look for every header action button */
+.header-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: 600 14px / 1 var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.header-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .trip-add-link {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: none;
   background: none;
   font-family: inherit;
+  line-height: 1.2;
   color: var(--accent);
   font-size: 14px;
   font-weight: 700;
@@ -69,10 +116,13 @@
 }
 
 .trip-nav-link {
+  display: inline-flex;
+  align-items: center;
   padding: 0;
   border: none;
   background: none;
   font-family: inherit;
+  line-height: 1.2;
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
@@ -572,9 +622,16 @@
     padding: 36px 24px 48px;
   }
 
-  .trip-header {
+  .trip-header-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .trip-header-row-global,
+  .trip-header-row-trip {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
   }
 
   .trip-actions {
