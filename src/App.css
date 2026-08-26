@@ -95,6 +95,38 @@
   color: var(--accent);
 }
 
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font: 600 13px / 1 var(--sans);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.theme-toggle:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.theme-toggle-icon {
+  display: inline-flex;
+  color: var(--accent);
+}
+
 .trip-add-link {
   display: inline-flex;
   align-items: center;
@@ -152,7 +184,7 @@
   width: 280px;
   border-radius: 22px;
   padding: 22px 20px 24px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: var(--surface-card);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-soft);
   display: flex;
@@ -187,7 +219,7 @@
 
 .day-title-input:focus {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.82);
+  background: var(--surface-raised);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -202,8 +234,8 @@
   gap: 8px;
   padding: 12px;
   border-radius: 16px;
-  border: 1px dashed rgba(146, 133, 122, 0.35);
-  background: rgba(255, 255, 255, 0.56);
+  border: 1px dashed var(--border-dashed);
+  background: var(--surface-subtle);
   transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
 
@@ -228,8 +260,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(146, 133, 122, 0.18);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-soft);
   cursor: grab;
 }
 
@@ -302,8 +334,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed rgba(146, 133, 122, 0.3);
+  background: var(--surface-muted);
+  border: 1px dashed var(--border-dashed);
   cursor: grab;
   position: relative;
 }
@@ -364,7 +396,7 @@
 
 .meal-slot.drop-over,
 .day-list.drop-over {
-  background: rgba(255, 255, 255, 0.88);
+  background: var(--surface-raised);
 }
 
 .remove-btn.visible {
@@ -373,7 +405,7 @@
 
 /* Todo section */
 .todo-section {
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: var(--surface-card);
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 22px 24px 24px;
@@ -409,7 +441,7 @@
   padding: 9px 14px;
   border-radius: 12px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-input);
   font: 14px / 1.4 var(--sans);
   color: var(--text);
   outline: none;
@@ -426,7 +458,7 @@
   border-radius: 12px;
   border: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-contrast);
   font: 600 14px / 1 var(--sans);
   cursor: pointer;
   transition: opacity 0.15s;
@@ -457,8 +489,8 @@
   gap: 6px;
   padding: 8px 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px dashed rgba(146, 133, 122, 0.4);
+  background: var(--surface-muted);
+  border: 1px dashed var(--border-dashed);
   font-size: 14px;
   cursor: grab;
   user-select: none;
@@ -466,7 +498,7 @@
 }
 
 .todo-item:hover {
-  box-shadow: 0 4px 12px rgba(94, 73, 60, 0.12);
+  box-shadow: var(--shadow-hover);
   border-color: var(--accent);
 }
 
@@ -527,7 +559,7 @@
   padding: 18px 22px;
   border-radius: 18px;
   border: 1px solid var(--border);
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: var(--surface-card);
   box-shadow: var(--shadow-soft);
   cursor: pointer;
   text-align: left;
@@ -576,7 +608,7 @@
   flex-direction: column;
   gap: 20px;
   max-width: 520px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  background: var(--surface-card);
   border: 1px solid var(--border);
   border-radius: 22px;
   padding: 28px;
@@ -606,7 +638,7 @@
 
 .new-trip-error {
   margin: 0;
-  color: #b3261e;
+  color: var(--danger);
   font-size: 14px;
   font-weight: 600;
 }

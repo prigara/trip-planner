@@ -1,14 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
-:root {
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
   --text: #2d2a26;
   --muted: #6f665f;
   --bg: #f6f1ea;
+  --bg-gradient: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, #efe7dd 100%);
+
+  /* solid chrome: pills, header buttons, inputs */
   --surface: #fbfaf7;
+  /* raised panels: day cards, ideas panel, trip rows, forms */
+  --surface-card: linear-gradient(160deg, rgba(255, 255, 255, 0.95), rgba(243, 240, 233, 0.92));
+  /* translucent layers stacked on top of a card, lightest to strongest */
+  --surface-subtle: rgba(255, 255, 255, 0.56);
+  --surface-muted: rgba(255, 255, 255, 0.7);
+  --surface-raised: rgba(255, 255, 255, 0.9);
+  --surface-input: rgba(255, 255, 255, 0.8);
+
   --border: rgba(154, 139, 126, 0.35);
+  --border-soft: rgba(146, 133, 122, 0.18);
+  --border-dashed: rgba(146, 133, 122, 0.35);
+
   --accent: #d06a3a;
   --accent-soft: rgba(208, 106, 58, 0.15);
+  /* text/icons drawn on top of --accent */
+  --accent-contrast: #fff;
+
+  --danger: #b3261e;
+
   --shadow-soft: 0 18px 40px rgba(94, 73, 60, 0.15);
+  --shadow-hover: 0 4px 12px rgba(94, 73, 60, 0.12);
 
   --sans: 'Space Grotesk', system-ui, sans-serif;
   --heading: 'Fraunces', 'Times New Roman', serif;
@@ -21,6 +44,35 @@
   -webkit-font-smoothing: antialiased;
 }
 
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --text: #ece9f5;
+  --muted: #a49cba;
+  --bg: #16121f;
+  --bg-gradient: radial-gradient(circle at top, #2a2140 0%, var(--bg) 45%, #0f0c16 100%);
+
+  --surface: #221c31;
+  --surface-card: linear-gradient(160deg, rgba(46, 38, 66, 0.95), rgba(32, 26, 47, 0.92));
+  --surface-subtle: rgba(255, 255, 255, 0.04);
+  --surface-muted: rgba(255, 255, 255, 0.06);
+  --surface-raised: rgba(255, 255, 255, 0.1);
+  --surface-input: rgba(12, 9, 18, 0.45);
+
+  --border: rgba(167, 139, 250, 0.28);
+  --border-soft: rgba(167, 139, 250, 0.16);
+  --border-dashed: rgba(167, 139, 250, 0.3);
+
+  --accent: #b79cff;
+  --accent-soft: rgba(167, 139, 250, 0.2);
+  --accent-contrast: #1a1226;
+
+  --danger: #ff8a80;
+
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -28,7 +80,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #fff 0%, var(--bg) 45%, #efe7dd 100%);
+  background: var(--bg-gradient);
 }
 
 #root {

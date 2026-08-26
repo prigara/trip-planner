@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { ThemeToggle } from './ThemeToggle'
+import { useTheme } from './useTheme'
+import type { Theme } from './useTheme'
 import './App.css'
 
 type Item = { id: string; text: string }
@@ -237,7 +240,12 @@ const buildDaysForRange = (startISO: string, endISO: string): Day[] => {
   return days
 }
 
-type TripPlannerProps = {
+type ThemeProps = {
+  theme: Theme
+  onToggleTheme: () => void
+}
+
+type TripPlannerProps = ThemeProps & {
   trip: Trip
   setDays: Dispatch<SetStateAction<Day[]>>
   setTodoItems: Dispatch<SetStateAction<Item[]>>
@@ -245,7 +253,15 @@ type TripPlannerProps = {
   onNewTrip: () => void
 }
 
-function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }: TripPlannerProps) {
+function TripPlanner({
+  trip,
+  setDays,
+  setTodoItems,
+  onShowAllTrips,
+  onNewTrip,
+  theme,
+  onToggleTheme,
+}: TripPlannerProps) {
   const { days, todoItems } = trip
   const [newItemText, setNewItemText] = useState('')
   const [draggingOver, setDraggingOver] = useState<string | null>(null)
@@ -542,6 +558,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
             <button type="button" className="header-btn" onClick={onShowAllTrips}>
               Show all trips
             </button>
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </div>
         <div className="trip-header-row trip-header-row-trip">
@@ -716,14 +733,21 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
   )
 }
 
-type TripListProps = {
+type TripListProps = ThemeProps & {
   trips: Trip[]
   activeTripId: string | null
   onSelectTrip: (tripId: string) => void
   onNewTrip: () => void
 }
 
-function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProps) {
+function TripList({
+  trips,
+  activeTripId,
+  onSelectTrip,
+  onNewTrip,
+  theme,
+  onToggleTheme,
+}: TripListProps) {
   return (
     <div className="app">
       <header className="trip-header">
@@ -733,6 +757,9 @@ function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProp
             <button type="button" className="header-btn" onClick={onNewTrip}>
               Plan a new trip
             </button>
+          </div>
+          <div className="trip-actions">
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </div>
       </header>
@@ -757,12 +784,12 @@ function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProp
   )
 }
 
-type NewTripFormProps = {
+type NewTripFormProps = ThemeProps & {
   onCreate: (trip: Trip) => void
   onCancel: () => void
 }
 
-function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
+function NewTripForm({ onCreate, onCancel, theme, onToggleTheme }: NewTripFormProps) {
   const [destination, setDestination] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -811,6 +838,7 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
             <button type="button" className="header-btn" onClick={onCancel}>
               Show all trips
             </button>
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </div>
       </header>
@@ -865,6 +893,7 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
 function App() {
   const [appState, setAppState] = useState<AppState>(loadAppState)
   const [view, setView] = useState<View>('planner')
+  const { theme, toggleTheme } = useTheme()
 
   const { trips, activeTripId } = appState
 
@@ -908,7 +937,14 @@ function App() {
   const effectiveView = trips.length === 0 ? 'new' : view
 
   if (effectiveView === 'new') {
-    return <NewTripForm onCreate={createTrip} onCancel={() => setView('list')} />
+    return (
+      <NewTripForm
+        onCreate={createTrip}
+        onCancel={() => setView('list')}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    )
   }
 
   if (effectiveView === 'list' || !activeTrip) {
@@ -918,6 +954,8 @@ function App() {
         activeTripId={activeTripId}
         onSelectTrip={selectTrip}
         onNewTrip={() => setView('new')}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
     )
   }
@@ -930,6 +968,8 @@ function App() {
       setTodoItems={setTodoItems}
       onShowAllTrips={() => setView('list')}
       onNewTrip={() => setView('new')}
+      theme={theme}
+      onToggleTheme={toggleTheme}
     />
   )
 }
