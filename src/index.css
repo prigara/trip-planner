@@ -59,13 +59,13 @@
   --surface-raised: rgba(255, 255, 255, 0.1);
   --surface-input: rgba(12, 9, 18, 0.45);
 
-  --border: rgba(167, 139, 250, 0.28);
-  --border-soft: rgba(167, 139, 250, 0.16);
-  --border-dashed: rgba(167, 139, 250, 0.3);
+  --border: rgba(247, 160, 100, 0.28);
+  --border-soft: rgba(247, 160, 100, 0.16);
+  --border-dashed: rgba(247, 160, 100, 0.3);
 
-  --accent: #b79cff;
-  --accent-soft: rgba(167, 139, 250, 0.2);
-  --accent-contrast: #1a1226;
+  --accent: #f79a5b;
+  --accent-soft: rgba(247, 154, 91, 0.2);
+  --accent-contrast: #26160c;
 
   --danger: #ff8a80;
 
