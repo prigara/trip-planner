@@ -16,6 +16,12 @@ list. Everything is stored in the browser's `localStorage` (key
 `trip-planner-state-v2`) — there is no backend and no account. A sample Paris
 trip is seeded on first run.
 
+## Theme
+
+The app currently uses a warm light theme. A dedicated dark theme has not been
+implemented yet, so browsers set to dark mode will still display the same light
+palette.
+
 ## Tech stack
 
 React 19 + TypeScript, built with Vite. No state library, no router, and no
