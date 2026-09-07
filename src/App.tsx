@@ -10,6 +10,7 @@ type AppState = { trips: Trip[]; activeTripId: string | null }
 type View = 'planner' | 'list' | 'new'
 
 const ALL_TRIPS_PATH = '/all'
+const NEW_TRIP_PATH = '/new'
 const STORAGE_KEY = 'trip-planner-state-v2'
 const LEGACY_STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
@@ -129,10 +130,18 @@ const isTrip = (value: unknown): value is Trip => {
 const normalizePath = (pathname: string) =>
   pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
 
-const viewFromPath = (pathname: string): View =>
-  normalizePath(pathname) === ALL_TRIPS_PATH ? 'list' : 'planner'
+const viewFromPath = (pathname: string): View => {
+  const path = normalizePath(pathname)
+  if (path === ALL_TRIPS_PATH) return 'list'
+  if (path === NEW_TRIP_PATH) return 'new'
+  return 'planner'
+}
 
-const pathForView = (view: View) => (view === 'list' ? ALL_TRIPS_PATH : '/')
+const pathForView = (view: View) => {
+  if (view === 'list') return ALL_TRIPS_PATH
+  if (view === 'new') return NEW_TRIP_PATH
+  return '/'
+}
 
 const seedParisTrip = (): Trip => ({
   id: mkId(),
@@ -249,19 +258,43 @@ const buildDaysForRange = (startISO: string, endISO: string): Day[] => {
 const isModifiedClick = (event: React.MouseEvent) =>
   event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
 
-function AllTripsLink({ onNavigate }: { onNavigate: () => void }) {
+function HeaderNavLink({
+  href,
+  onNavigate,
+  children,
+}: {
+  href: string
+  onNavigate: () => void
+  children: React.ReactNode
+}) {
   return (
     <a
       className="header-btn"
-      href={ALL_TRIPS_PATH}
+      href={href}
       onClick={event => {
         if (isModifiedClick(event)) return
         event.preventDefault()
         onNavigate()
       }}
     >
-      Show all trips
+      {children}
     </a>
+  )
+}
+
+function AllTripsLink({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <HeaderNavLink href={ALL_TRIPS_PATH} onNavigate={onNavigate}>
+      Show all trips
+    </HeaderNavLink>
+  )
+}
+
+function NewTripLink({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <HeaderNavLink href={NEW_TRIP_PATH} onNavigate={onNavigate}>
+      Plan a new trip
+    </HeaderNavLink>
   )
 }
 
@@ -564,9 +597,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
         <div className="trip-header-row trip-header-row-global">
           <p className="eyebrow">Trip</p>
           <div className="trip-actions">
-            <button type="button" className="header-btn" onClick={onNewTrip}>
-              Plan a new trip
-            </button>
+            <NewTripLink onNavigate={onNewTrip} />
             <AllTripsLink onNavigate={onShowAllTrips} />
           </div>
         </div>
@@ -756,9 +787,7 @@ function TripList({ trips, activeTripId, onSelectTrip, onNewTrip }: TripListProp
         <div className="trip-header-row">
           <div>
             <p className="eyebrow">Trips</p>
-            <button type="button" className="header-btn" onClick={onNewTrip}>
-              Plan a new trip
-            </button>
+            <NewTripLink onNavigate={onNewTrip} />
           </div>
         </div>
       </header>
