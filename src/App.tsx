@@ -9,6 +9,7 @@ type Trip = { id: string; destination: string; days: Day[]; todoItems: Item[] }
 type AppState = { trips: Trip[]; activeTripId: string | null }
 type View = 'planner' | 'list' | 'new'
 
+const ALL_TRIPS_PATH = '/all'
 const STORAGE_KEY = 'trip-planner-state-v2'
 const LEGACY_STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
@@ -125,6 +126,14 @@ const isTrip = (value: unknown): value is Trip => {
   )
 }
 
+const normalizePath = (pathname: string) =>
+  pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
+
+const viewFromPath = (pathname: string): View =>
+  normalizePath(pathname) === ALL_TRIPS_PATH ? 'list' : 'planner'
+
+const pathForView = (view: View) => (view === 'list' ? ALL_TRIPS_PATH : '/')
+
 const seedParisTrip = (): Trip => ({
   id: mkId(),
   destination: 'Paris',
@@ -235,6 +244,25 @@ const buildDaysForRange = (startISO: string, endISO: string): Day[] => {
   }
 
   return days
+}
+
+const isModifiedClick = (event: React.MouseEvent) =>
+  event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
+
+function AllTripsLink({ onNavigate }: { onNavigate: () => void }) {
+  return (
+    <a
+      className="header-btn"
+      href={ALL_TRIPS_PATH}
+      onClick={event => {
+        if (isModifiedClick(event)) return
+        event.preventDefault()
+        onNavigate()
+      }}
+    >
+      Show all trips
+    </a>
+  )
 }
 
 type TripPlannerProps = {
@@ -539,9 +567,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
             <button type="button" className="header-btn" onClick={onNewTrip}>
               Plan a new trip
             </button>
-            <button type="button" className="header-btn" onClick={onShowAllTrips}>
-              Show all trips
-            </button>
+            <AllTripsLink onNavigate={onShowAllTrips} />
           </div>
         </div>
         <div className="trip-header-row trip-header-row-trip">
@@ -808,9 +834,7 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
             <h1>Plan a new trip</h1>
           </div>
           <div className="trip-actions">
-            <button type="button" className="header-btn" onClick={onCancel}>
-              Show all trips
-            </button>
+            <AllTripsLink onNavigate={onCancel} />
           </div>
         </div>
       </header>
@@ -864,13 +888,29 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
 
 function App() {
   const [appState, setAppState] = useState<AppState>(loadAppState)
-  const [view, setView] = useState<View>('planner')
+  const [view, setView] = useState<View>(() => viewFromPath(window.location.pathname))
 
   const { trips, activeTripId } = appState
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState))
   }, [appState])
+
+  useEffect(() => {
+    const onPopState = () => {
+      setView(viewFromPath(window.location.pathname))
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
+  const navigate = (nextView: View) => {
+    const nextPath = pathForView(nextView)
+    if (normalizePath(window.location.pathname) !== nextPath) {
+      window.history.pushState(null, '', nextPath)
+    }
+    setView(nextView)
+  }
 
   const updateActiveTrip = (updater: (trip: Trip) => Trip) => {
     setAppState(prev => ({
@@ -896,19 +936,19 @@ function App() {
 
   const selectTrip = (tripId: string) => {
     setAppState(prev => ({ ...prev, activeTripId: tripId }))
-    setView('planner')
+    navigate('planner')
   }
 
   const createTrip = (trip: Trip) => {
     setAppState(prev => ({ trips: [...prev.trips, trip], activeTripId: trip.id }))
-    setView('planner')
+    navigate('planner')
   }
 
   const activeTrip = trips.find(trip => trip.id === activeTripId) ?? null
   const effectiveView = trips.length === 0 ? 'new' : view
 
   if (effectiveView === 'new') {
-    return <NewTripForm onCreate={createTrip} onCancel={() => setView('list')} />
+    return <NewTripForm onCreate={createTrip} onCancel={() => navigate('list')} />
   }
 
   if (effectiveView === 'list' || !activeTrip) {
@@ -917,7 +957,7 @@ function App() {
         trips={trips}
         activeTripId={activeTripId}
         onSelectTrip={selectTrip}
-        onNewTrip={() => setView('new')}
+        onNewTrip={() => navigate('new')}
       />
     )
   }
@@ -928,8 +968,8 @@ function App() {
       trip={activeTrip}
       setDays={setDays}
       setTodoItems={setTodoItems}
-      onShowAllTrips={() => setView('list')}
-      onNewTrip={() => setView('new')}
+      onShowAllTrips={() => navigate('list')}
+      onNewTrip={() => navigate('new')}
     />
   )
 }
