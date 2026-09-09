@@ -545,7 +545,7 @@ function TripPlanner({ trip, setDays, setTodoItems, onShowAllTrips, onNewTrip }:
           </div>
         </div>
         <div className="trip-header-row trip-header-row-trip">
-          <h1 className="trip-destination">{trip.destination}</h1>
+          <h1 className="trip-destination">My next trip to {trip.destination}</h1>
           <div className="trip-actions">
             <div className="trip-dates">
               {getTripRangeLabel(days)}
