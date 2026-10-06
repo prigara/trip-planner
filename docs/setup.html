@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip Planner — Setup Instructions</title>
+  <style>
+    :root {
+      --bg: #f7f7f9;
+      --surface: #ffffff;
+      --text: #1d1d24;
+      --muted: #5c5c6b;
+      --border: #e2e2ea;
+      --accent: #4a5bdc;
+      --code-bg: #f0f0f5;
+      --note-bg: #eef1ff;
+      --warn-bg: #fff6e5;
+      --warn-border: #f0c36d;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16161c;
+        --surface: #1f1f27;
+        --text: #e8e8ef;
+        --muted: #a0a0b2;
+        --border: #33333f;
+        --accent: #8c98ff;
+        --code-bg: #2a2a35;
+        --note-bg: #232845;
+        --warn-bg: #3a2f1a;
+        --warn-border: #8a6a2c;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    header { margin-bottom: 32px; }
+    h1 { font-size: 2rem; margin: 0 0 8px; }
+    h2 {
+      font-size: 1.3rem;
+      margin: 40px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.05rem; margin: 24px 0 8px; }
+    p.lead { color: var(--muted); margin: 0; }
+    a { color: var(--accent); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9em;
+      background: var(--code-bg);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    pre {
+      position: relative;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      margin: 8px 0 16px;
+    }
+    pre code { background: none; padding: 0; font-size: 0.88rem; }
+    .copy {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font: inherit;
+      font-size: 0.75rem;
+      padding: 3px 9px;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .copy:hover { color: var(--text); }
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 20px;
+    }
+    nav.toc ol { margin: 0; padding-left: 20px; }
+    ol.steps { counter-reset: step; list-style: none; padding: 0; }
+    ol.steps > li {
+      counter-increment: step;
+      position: relative;
+      padding-left: 44px;
+      margin-bottom: 20px;
+    }
+    ol.steps > li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .note, .warn {
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+    }
+    .note { background: var(--note-bg); }
+    .warn { background: var(--warn-bg); border-left: 4px solid var(--warn-border); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 8px 0 16px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    th { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+    tr:last-child td { border-bottom: none; }
+    footer { margin-top: 56px; color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Trip Planner — Setup</h1>
+    <p class="lead">
+      How to install, run, and build the Trip Planner single-page app locally.
+    </p>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <ol>
+      <li><a href="#prerequisites">Prerequisites</a></li>
+      <li><a href="#quick-start">Quick start</a></li>
+      <li><a href="#scripts">Available scripts</a></li>
+      <li><a href="#production">Building for production</a></li>
+      <li><a href="#data">Data &amp; storage</a></li>
+      <li><a href="#structure">Project structure</a></li>
+      <li><a href="#troubleshooting">Troubleshooting</a></li>
+    </ol>
+  </nav>
+
+  <section id="prerequisites">
+    <h2>1. Prerequisites</h2>
+    <table>
+      <thead>
+        <tr><th>Tool</th><th>Version</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Node.js</td>
+          <td><code>20.19+</code> or <code>22.12+</code></td>
+          <td>Required by Vite 8. Check with <code>node -v</code>.</td>
+        </tr>
+        <tr>
+          <td>npm</td>
+          <td>Bundled with Node</td>
+          <td>The repo ships a <code>package-lock.json</code>, so npm is the expected package manager.</td>
+        </tr>
+        <tr>
+          <td>Git</td>
+          <td>Any recent version</td>
+          <td>To clone the repository.</td>
+        </tr>
+        <tr>
+          <td>Browser</td>
+          <td>Any modern browser</td>
+          <td>Must allow <code>localStorage</code> (data is saved there).</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="note">
+      No backend, database, API keys, or environment variables are needed — the
+      app runs entirely in the browser.
+    </div>
+  </section>
+
+  <section id="quick-start">
+    <h2>2. Quick start</h2>
+    <ol class="steps">
+      <li>
+        <strong>Clone the repository</strong>
+        <pre><code>git clone &lt;repository-url&gt; trip-planner
+cd trip-planner</code></pre>
+      </li>
+      <li>
+        <strong>Install dependencies</strong>
+        <pre><code>npm install</code></pre>
+        For a clean, reproducible install that strictly follows the lockfile
+        (e.g. in CI), use <code>npm ci</code> instead.
+      </li>
+      <li>
+        <strong>Start the dev server</strong>
+        <pre><code>npm run dev</code></pre>
+      </li>
+      <li>
+        <strong>Open the app</strong><br />
+        Visit the URL Vite prints — by default
+        <a href="http://localhost:5173">http://localhost:5173</a>.
+        Edits to files in <code>src/</code> hot-reload automatically.
+      </li>
+    </ol>
+    <div class="note">
+      On first run the app seeds a sample <strong>Paris</strong> trip so you can
+      try drag-and-drop right away.
+    </div>
+  </section>
+
+  <section id="scripts">
+    <h2>3. Available scripts</h2>
+    <table>
+      <thead>
+        <tr><th>Command</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>npm run dev</code></td><td>Start the Vite dev server with hot module reload.</td></tr>
+        <tr><td><code>npm run build</code></td><td>Type-check the project (<code>tsc -b</code>) and build optimized assets into <code>dist/</code>.</td></tr>
+        <tr><td><code>npm run preview</code></td><td>Serve the production build from <code>dist/</code> locally (run <code>build</code> first).</td></tr>
+        <tr><td><code>npm run lint</code></td><td>Run ESLint over the project.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="production">
+    <h2>4. Building for production</h2>
+    <pre><code>npm run build
+npm run preview</code></pre>
+    <p>
+      The output in <code>dist/</code> is a fully static site (HTML, JS, CSS,
+      assets). Deploy it to any static host — GitHub Pages, Netlify, Vercel,
+      S3, nginx, etc. No server-side runtime is required.
+    </p>
+    <div class="warn">
+      If you host the app under a sub-path (e.g.
+      <code>https://example.com/trip-planner/</code>), set
+      <code>base: '/trip-planner/'</code> in <code>vite.config.ts</code> before
+      building, otherwise asset URLs will resolve against the domain root.
+    </div>
+  </section>
+
+  <section id="data">
+    <h2>5. Data &amp; storage</h2>
+    <ul>
+      <li>All trips are stored in the browser's <code>localStorage</code> under the key
+        <code>trip-planner-state-v2</code>.</li>
+      <li>Data is per-browser and per-origin: <code>localhost:5173</code> (dev) and
+        <code>localhost:4173</code> (preview) keep separate data.</li>
+      <li>Older data saved under <code>trip-planner-state-v1</code> is migrated
+        automatically into a single trip on load.</li>
+      <li>If the stored state is malformed, the app discards it and falls back to the
+        seeded sample trip.</li>
+    </ul>
+    <h3>Resetting to a clean state</h3>
+    <p>Open the browser DevTools console on the app's page and run:</p>
+    <pre><code>localStorage.removeItem('trip-planner-state-v2')
+localStorage.removeItem('trip-planner-state-v1')
+location.reload()</code></pre>
+  </section>
+
+  <section id="structure">
+    <h2>6. Project structure</h2>
+    <pre><code>trip-planner/
+├── index.html           # Vite entry HTML
+├── public/              # Static assets copied as-is (favicon, icons)
+├── src/
+│   ├── main.tsx         # React root mount
+│   ├── App.tsx          # The whole app: state, persistence, UI, drag &amp; drop
+│   ├── App.css          # Component styles
+│   ├── index.css        # Global styles
+│   └── assets/          # Images imported from code
+├── vite.config.ts       # Vite + React plugin config
+├── tsconfig*.json       # TypeScript project configs
+└── eslint.config.js     # ESLint flat config</code></pre>
+    <p>
+      Stack: React 19 + TypeScript 6, built with Vite 8. There are no runtime
+      dependencies beyond <code>react</code> and <code>react-dom</code> — no
+      router or state library.
+    </p>
+  </section>
+
+  <section id="troubleshooting">
+    <h2>7. Troubleshooting</h2>
+    <h3>Vite fails to start with a Node version error</h3>
+    <p>Upgrade Node to <code>20.19+</code> or <code>22.12+</code> (e.g. via
+      <code>nvm install 22 &amp;&amp; nvm use 22</code>), then reinstall:</p>
+    <pre><code>rm -rf node_modules
+npm install</code></pre>
+
+    <h3>Port 5173 is already in use</h3>
+    <p>Vite will pick the next free port automatically and print it. To force a
+      specific port:</p>
+    <pre><code>npm run dev -- --port 3000</code></pre>
+
+    <h3>Accessing the dev server from another device / container</h3>
+    <p>Expose it on all network interfaces:</p>
+    <pre><code>npm run dev -- --host</code></pre>
+
+    <h3>My trips disappeared</h3>
+    <p>Data lives in <code>localStorage</code>, so it is lost when you clear site
+      data, use a private window, switch browsers, or open the app on a different
+      port/origin.</p>
+
+    <h3><code>npm run build</code> fails with type errors</h3>
+    <p>The build runs <code>tsc -b</code> first, with strict checks such as
+      <code>noUnusedLocals</code> and <code>noUnusedParameters</code>. Fix the
+      reported errors — the dev server does not type-check, so these can slip
+      through during development.</p>
+  </section>
+
+  <footer>
+    Trip Planner · setup guide
+  </footer>
+</main>
+
+<script>
+  document.querySelectorAll('pre').forEach(pre => {
+    const button = document.createElement('button')
+    button.className = 'copy'
+    button.type = 'button'
+    button.textContent = 'Copy'
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(pre.querySelector('code').innerText)
+        button.textContent = 'Copied'
+      } catch {
+        button.textContent = 'Failed'
+      }
+      setTimeout(() => { button.textContent = 'Copy' }, 1500)
+    })
+    pre.appendChild(button)
+  })
+</script>
+</body>
+</html>
