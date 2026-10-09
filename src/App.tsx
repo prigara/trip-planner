@@ -10,6 +10,9 @@ type AppState = { trips: Trip[]; activeTripId: string | null }
 type View = 'planner' | 'list' | 'new'
 
 const STORAGE_KEY = 'trip-planner-state-v2'
+const VIEW_PATHS: Record<View, string> = { planner: '/', list: '/all', new: '/new' }
+const viewFromPath = (pathname: string): View =>
+  pathname === VIEW_PATHS.list ? 'list' : pathname === VIEW_PATHS.new ? 'new' : 'planner'
 const LEGACY_STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
 const mkItem = (text: string): Item => ({ id: mkId(), text })
@@ -864,13 +867,26 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
 
 function App() {
   const [appState, setAppState] = useState<AppState>(loadAppState)
-  const [view, setView] = useState<View>('planner')
+  const [view, setViewState] = useState<View>(() => viewFromPath(window.location.pathname))
 
   const { trips, activeTripId } = appState
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(appState))
   }, [appState])
+
+  useEffect(() => {
+    const onPopState = () => setViewState(viewFromPath(window.location.pathname))
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
+  const setView = (next: View) => {
+    if (window.location.pathname !== VIEW_PATHS[next]) {
+      window.history.pushState(null, '', VIEW_PATHS[next])
+    }
+    setViewState(next)
+  }
 
   const updateActiveTrip = (updater: (trip: Trip) => Trip) => {
     setAppState(prev => ({
