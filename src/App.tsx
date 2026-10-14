@@ -26,6 +26,7 @@ const HEADER_DATE_FORMATTER = new Intl.DateTimeFormat('en-US', {
   day: 'numeric',
   timeZone: 'UTC',
 })
+const SLUG_MONTH_FORMATTER = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' })
 const dayFiveItems = ['Pastries run', 'Souvenirs', 'Pack for departure']
 const daySixItems = ['Check out', 'Station transfer', 'Midday train departure']
 
@@ -131,34 +132,74 @@ const isTrip = (value: unknown): value is Trip => {
 const normalizePath = (pathname: string) =>
   pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
 
-const routeFromPath = (pathname: string): Route => {
+const slugify = (text: string) =>
+  text
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '-')
+    .replace(/^-+|-+$/g, '')
+
+// e.g. "Paris" starting on Oct 14 -> "paris-14-oct"
+const baseSlugForTrip = (trip: Trip) => {
+  const city = slugify(trip.destination) || 'trip'
+  const startDate = trip.days[0] ? parseDayDate(trip.days[0].date) : null
+  if (!startDate) return city
+  const month = SLUG_MONTH_FORMATTER.format(startDate).toLowerCase()
+  return `${city}-${startDate.getUTCDate()}-${month}`
+}
+
+// Maps trip id -> slug, appending -2, -3, ... when trips would otherwise share a slug.
+const getTripSlugs = (trips: Trip[]) => {
+  const slugs = new Map<string, string>()
+  const used = new Set<string>()
+  for (const trip of trips) {
+    const base = baseSlugForTrip(trip)
+    let slug = base
+    for (let n = 2; used.has(slug); n++) slug = `${base}-${n}`
+    used.add(slug)
+    slugs.set(trip.id, slug)
+  }
+  return slugs
+}
+
+const tripIdFromSlug = (trips: Trip[], slug: string) => {
+  for (const [tripId, tripSlug] of getTripSlugs(trips)) {
+    if (tripSlug === slug) return tripId
+  }
+  // Older links used the raw trip id.
+  return trips.some(trip => trip.id === slug) ? slug : null
+}
+
+const routeFromPath = (pathname: string, trips: Trip[]): Route => {
   const path = normalizePath(pathname)
   if (path === ALL_TRIPS_PATH) return { view: 'list' }
   if (path === NEW_TRIP_PATH) return { view: 'new' }
   if (path.startsWith(TRIP_PATH_PREFIX)) {
-    let tripId: string | null = null
+    let slug = ''
     try {
-      tripId = decodeURIComponent(path.slice(TRIP_PATH_PREFIX.length)) || null
+      slug = decodeURIComponent(path.slice(TRIP_PATH_PREFIX.length))
     } catch {
-      // Malformed escape sequence: keep a non-null id that matches no trip.
-      tripId = ''
+      // Malformed escape sequence: treat as an unknown trip.
     }
-    return { view: 'planner', tripId }
+    // An unknown slug keeps a non-null id that matches no trip.
+    return { view: 'planner', tripId: tripIdFromSlug(trips, slug) ?? '' }
   }
   return { view: 'planner', tripId: null }
 }
 
-const pathForTrip = (tripId: string) => `${TRIP_PATH_PREFIX}${encodeURIComponent(tripId)}`
+const pathForTrip = (trips: Trip[], tripId: string) =>
+  `${TRIP_PATH_PREFIX}${encodeURIComponent(getTripSlugs(trips).get(tripId) ?? tripId)}`
 
-const pathForRoute = (route: Route) => {
+const pathForRoute = (route: Route, trips: Trip[]) => {
   if (route.view === 'list') return ALL_TRIPS_PATH
   if (route.view === 'new') return NEW_TRIP_PATH
-  return route.tripId === null ? '/' : pathForTrip(route.tripId)
+  return route.tripId === null ? '/' : pathForTrip(trips, route.tripId)
 }
 
 const loadAppStateForPath = (pathname: string): AppState => {
   const state = loadAppState()
-  const route = routeFromPath(pathname)
+  const route = routeFromPath(pathname, state.trips)
   if (
     route.view === 'planner' &&
     route.tripId !== null &&
@@ -945,7 +986,9 @@ function App() {
   const [appState, setAppState] = useState<AppState>(() =>
     loadAppStateForPath(window.location.pathname),
   )
-  const [route, setRoute] = useState<Route>(() => routeFromPath(window.location.pathname))
+  const [route, setRoute] = useState<Route>(() =>
+    routeFromPath(window.location.pathname, appState.trips),
+  )
 
   const { trips, activeTripId } = appState
 
@@ -955,7 +998,7 @@ function App() {
 
   useEffect(() => {
     const onPopState = () => {
-      const nextRoute = routeFromPath(window.location.pathname)
+      const nextRoute = routeFromPath(window.location.pathname, trips)
       setRoute(nextRoute)
       if (nextRoute.view === 'planner' && nextRoute.tripId !== null) {
         const tripId = nextRoute.tripId
@@ -966,10 +1009,10 @@ function App() {
     }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
-  }, [])
+  }, [trips])
 
-  const navigate = (nextRoute: Route) => {
-    const nextPath = pathForRoute(nextRoute)
+  const navigate = (nextRoute: Route, nextTrips = trips) => {
+    const nextPath = pathForRoute(nextRoute, nextTrips)
     if (normalizePath(window.location.pathname) !== nextPath) {
       window.history.pushState(null, '', nextPath)
     }
@@ -980,14 +1023,15 @@ function App() {
   const activeTrip = trips.find(trip => trip.id === shownTripId) ?? null
   const effectiveView = trips.length === 0 ? 'new' : route.view
 
-  // Canonicalize "/" to the shown trip's own URL so it can be bookmarked and shared.
+  // Keep the address bar on the shown trip's current slug (covers "/", old id links,
+  // and destination/start-date edits) so it can be bookmarked and shared.
   useEffect(() => {
     if (effectiveView !== 'planner' || !activeTrip) return
-    const tripPath = pathForTrip(activeTrip.id)
+    const tripPath = pathForTrip(trips, activeTrip.id)
     if (normalizePath(window.location.pathname) !== tripPath) {
       window.history.replaceState(null, '', tripPath)
     }
-  }, [effectiveView, activeTrip])
+  }, [effectiveView, activeTrip, trips])
 
   const updateActiveTrip = (updater: (trip: Trip) => Trip) => {
     if (!activeTrip) return
@@ -1020,7 +1064,7 @@ function App() {
 
   const createTrip = (trip: Trip) => {
     setAppState(prev => ({ trips: [...prev.trips, trip], activeTripId: trip.id }))
-    navigate({ view: 'planner', tripId: trip.id })
+    navigate({ view: 'planner', tripId: trip.id }, [...trips, trip])
   }
 
   if (effectiveView === 'new') {
