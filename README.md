@@ -16,9 +16,30 @@ list. Everything is stored in the browser's `localStorage` (key
 `trip-planner-state-v2`) — there is no backend and no account. A sample Paris
 trip is seeded on first run.
 
+## URLs
+
+| Path | Shows |
+| --- | --- |
+| `/` | The last opened trip (the address bar is then switched to that trip's URL) |
+| `/trips/<city>-<day>-<mon>` | A specific trip, e.g. `/trips/paris-14-oct` |
+| `/all` | The trip list |
+| `/new` | The new-trip form |
+
+A trip's URL is derived from its destination and the date of its first day, so
+it changes if you edit those (for example, removing the first day). If several
+trips would share a URL, later ones get a `-2`, `-3`, … suffix in trip-list
+order. A trip with no parseable start date uses just the city. Older
+`/trips/<trip-id>` links still resolve and are redirected to the new form; an
+unknown trip URL shows the trip list.
+
+Because trips live in `localStorage`, a trip URL only works in the browser that
+created the trip. When deploying, configure the server to serve `index.html` for
+all of these paths (the Vite dev and preview servers already do).
+
 ## Tech stack
 
-React 19 + TypeScript, built with Vite. No state library, no router, and no
+React 19 + TypeScript, built with Vite. No state library, no router library
+(routing is a few helpers over the History API), and no
 runtime dependencies beyond React — the whole app lives in
 [App.tsx](air-file://lasjqteqhjilpe1f1748/workspaces/trip-planner/src/App.tsx?type=file&root=%252F).
 
