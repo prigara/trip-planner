@@ -7,10 +7,11 @@ type DaySlot = 'items' | 'lunch' | 'dinner'
 type DragSource = 'todo' | { dayIndex: number; slot: DaySlot }
 type Trip = { id: string; destination: string; days: Day[]; todoItems: Item[] }
 type AppState = { trips: Trip[]; activeTripId: string | null }
-type View = 'planner' | 'list' | 'new'
+type Route = { view: 'list' } | { view: 'new' } | { view: 'planner'; tripId: string | null }
 
 const ALL_TRIPS_PATH = '/all'
 const NEW_TRIP_PATH = '/new'
+const TRIP_PATH_PREFIX = '/trips/'
 const STORAGE_KEY = 'trip-planner-state-v2'
 const LEGACY_STORAGE_KEY = 'trip-planner-state-v1'
 const mkId = () => globalThis.crypto?.randomUUID() ?? `${Date.now()}-${Math.random()}`
@@ -130,17 +131,42 @@ const isTrip = (value: unknown): value is Trip => {
 const normalizePath = (pathname: string) =>
   pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname
 
-const viewFromPath = (pathname: string): View => {
+const routeFromPath = (pathname: string): Route => {
   const path = normalizePath(pathname)
-  if (path === ALL_TRIPS_PATH) return 'list'
-  if (path === NEW_TRIP_PATH) return 'new'
-  return 'planner'
+  if (path === ALL_TRIPS_PATH) return { view: 'list' }
+  if (path === NEW_TRIP_PATH) return { view: 'new' }
+  if (path.startsWith(TRIP_PATH_PREFIX)) {
+    let tripId: string | null = null
+    try {
+      tripId = decodeURIComponent(path.slice(TRIP_PATH_PREFIX.length)) || null
+    } catch {
+      // Malformed escape sequence: keep a non-null id that matches no trip.
+      tripId = ''
+    }
+    return { view: 'planner', tripId }
+  }
+  return { view: 'planner', tripId: null }
 }
 
-const pathForView = (view: View) => {
-  if (view === 'list') return ALL_TRIPS_PATH
-  if (view === 'new') return NEW_TRIP_PATH
-  return '/'
+const pathForTrip = (tripId: string) => `${TRIP_PATH_PREFIX}${encodeURIComponent(tripId)}`
+
+const pathForRoute = (route: Route) => {
+  if (route.view === 'list') return ALL_TRIPS_PATH
+  if (route.view === 'new') return NEW_TRIP_PATH
+  return route.tripId === null ? '/' : pathForTrip(route.tripId)
+}
+
+const loadAppStateForPath = (pathname: string): AppState => {
+  const state = loadAppState()
+  const route = routeFromPath(pathname)
+  if (
+    route.view === 'planner' &&
+    route.tripId !== null &&
+    state.trips.some(trip => trip.id === route.tripId)
+  ) {
+    return { ...state, activeTripId: route.tripId }
+  }
+  return state
 }
 
 const seedParisTrip = (): Trip => ({
@@ -916,8 +942,10 @@ function NewTripForm({ onCreate, onCancel }: NewTripFormProps) {
 }
 
 function App() {
-  const [appState, setAppState] = useState<AppState>(loadAppState)
-  const [view, setView] = useState<View>(() => viewFromPath(window.location.pathname))
+  const [appState, setAppState] = useState<AppState>(() =>
+    loadAppStateForPath(window.location.pathname),
+  )
+  const [route, setRoute] = useState<Route>(() => routeFromPath(window.location.pathname))
 
   const { trips, activeTripId } = appState
 
@@ -927,24 +955,46 @@ function App() {
 
   useEffect(() => {
     const onPopState = () => {
-      setView(viewFromPath(window.location.pathname))
+      const nextRoute = routeFromPath(window.location.pathname)
+      setRoute(nextRoute)
+      if (nextRoute.view === 'planner' && nextRoute.tripId !== null) {
+        const tripId = nextRoute.tripId
+        setAppState(prev =>
+          prev.trips.some(trip => trip.id === tripId) ? { ...prev, activeTripId: tripId } : prev,
+        )
+      }
     }
     window.addEventListener('popstate', onPopState)
     return () => window.removeEventListener('popstate', onPopState)
   }, [])
 
-  const navigate = (nextView: View) => {
-    const nextPath = pathForView(nextView)
+  const navigate = (nextRoute: Route) => {
+    const nextPath = pathForRoute(nextRoute)
     if (normalizePath(window.location.pathname) !== nextPath) {
       window.history.pushState(null, '', nextPath)
     }
-    setView(nextView)
+    setRoute(nextRoute)
   }
 
+  const shownTripId = route.view === 'planner' ? (route.tripId ?? activeTripId) : activeTripId
+  const activeTrip = trips.find(trip => trip.id === shownTripId) ?? null
+  const effectiveView = trips.length === 0 ? 'new' : route.view
+
+  // Canonicalize "/" to the shown trip's own URL so it can be bookmarked and shared.
+  useEffect(() => {
+    if (effectiveView !== 'planner' || !activeTrip) return
+    const tripPath = pathForTrip(activeTrip.id)
+    if (normalizePath(window.location.pathname) !== tripPath) {
+      window.history.replaceState(null, '', tripPath)
+    }
+  }, [effectiveView, activeTrip])
+
   const updateActiveTrip = (updater: (trip: Trip) => Trip) => {
+    if (!activeTrip) return
+    const tripId = activeTrip.id
     setAppState(prev => ({
       ...prev,
-      trips: prev.trips.map(trip => (trip.id === prev.activeTripId ? updater(trip) : trip)),
+      trips: prev.trips.map(trip => (trip.id === tripId ? updater(trip) : trip)),
     }))
   }
 
@@ -965,19 +1015,16 @@ function App() {
 
   const selectTrip = (tripId: string) => {
     setAppState(prev => ({ ...prev, activeTripId: tripId }))
-    navigate('planner')
+    navigate({ view: 'planner', tripId })
   }
 
   const createTrip = (trip: Trip) => {
     setAppState(prev => ({ trips: [...prev.trips, trip], activeTripId: trip.id }))
-    navigate('planner')
+    navigate({ view: 'planner', tripId: trip.id })
   }
 
-  const activeTrip = trips.find(trip => trip.id === activeTripId) ?? null
-  const effectiveView = trips.length === 0 ? 'new' : view
-
   if (effectiveView === 'new') {
-    return <NewTripForm onCreate={createTrip} onCancel={() => navigate('list')} />
+    return <NewTripForm onCreate={createTrip} onCancel={() => navigate({ view: 'list' })} />
   }
 
   if (effectiveView === 'list' || !activeTrip) {
@@ -986,7 +1033,7 @@ function App() {
         trips={trips}
         activeTripId={activeTripId}
         onSelectTrip={selectTrip}
-        onNewTrip={() => navigate('new')}
+        onNewTrip={() => navigate({ view: 'new' })}
       />
     )
   }
@@ -997,8 +1044,8 @@ function App() {
       trip={activeTrip}
       setDays={setDays}
       setTodoItems={setTodoItems}
-      onShowAllTrips={() => navigate('list')}
-      onNewTrip={() => navigate('new')}
+      onShowAllTrips={() => navigate({ view: 'list' })}
+      onNewTrip={() => navigate({ view: 'new' })}
     />
   )
 }
